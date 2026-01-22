@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- Primary Meta Tags -->
+    <title>ChefMistri - Turn Your Fridge Into a Feast</title>
+    <meta name="title" content="ChefMistri - Turn Your Fridge Into a Feast" />
+    <meta name="description" content="AI-powered kitchen assistant. Manage your pantry, get personalized recipe recommendations, and plan your weekly meals with ease using ChefMistri." />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://chefmistri.vercel.app/" />
+    <meta property="og:title" content="ChefMistri - Turn Your Fridge Into a Feast" />
+    <meta property="og:description" content="The ultimate AI chef in your pocket. Generate recipes from your current ingredients and save money on groceries." />
+    <meta property="og:image" content="https://thedeliciousplate.com/wp-content/uploads/2019/07/cropped-IMG_5672.jpg" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://chefmistri.vercel.app/" />
+    <meta property="twitter:title" content="ChefMistri - AI Kitchen Assistant" />
+    <meta property="twitter:description" content="Turn your pantry into a professional menu with Gemini-powered recipe generation." />
+    <meta property="twitter:image" content="https://thedeliciousplate.com/wp-content/uploads/2019/07/cropped-IMG_5672.jpg" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700;900&family=Noto+Sans:wght@400;500;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              primary: "#13ec37",
+              "primary-dark": "#0fb62b",
+              "primary-hover": "#0fd330",
+              "background-light": "#F9FCFA",
+              "background-dark": "#102213",
+              "surface-light": "#ffffff",
+              "surface-dark": "#1a2e1d",
+              "text-main": "#0d1b10",
+              "text-secondary": "#4c9a59",
+              "border-light": "#cfe7d3",
+              "border-dark": "#2a4e30",
+            },
+            backgroundImage: {
+              'mint-subtle': 'linear-gradient(135deg, #F9FCFA 0%, #F5FBF5 50%, #F9FCFA 100%)',
+            },
+            fontFamily: {
+              display: ["Work Sans", "sans-serif"],
+              body: ["Noto Sans", "sans-serif"],
+            },
+            borderRadius: {
+              DEFAULT: "0.25rem",
+              lg: "0.5rem",
+              xl: "0.75rem",
+              "2xl": "1rem",
+              "3xl": "1.5rem",
+              "4xl": "2rem",
+              full: "9999px"
+            },
+          },
+        },
+      }
+    </script>
+    <style>
+      ::-webkit-scrollbar { width: 8px; }
+      ::-webkit-scrollbar-track { background: transparent; }
+      ::-webkit-scrollbar-thumb { background-color: rgba(0, 0, 0, 0.1); border-radius: 4px; }
+      
+      @keyframes floating {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-20px); }
+      }
+      .animate-floating {
+        animation: floating 4s ease-in-out infinite;
+      }
+      @keyframes floating-delayed {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-12px); }
+      }
+      .animate-floating-delayed {
+        animation: floating-delayed 5s ease-in-out infinite;
+      }
+
+      body {
+        margin: 0;
+        padding: 0;
+      }
+
+      @media print {
+        @page {
+          margin: 1.5cm;
+          size: auto;
+        }
+        body {
+          background: white !important;
+          color: black !important;
+          print-color-adjust: exact;
+          -webkit-print-color-adjust: exact;
+        }
+        .no-print {
+          display: none !important;
+        }
+        main {
+          margin: 0 !important;
+          padding: 0 !important;
+          width: 100% !important;
+        }
+        .recipe-image {
+          width: 100% !important;
+          max-height: 500px !important;
+          object-fit: cover;
+          border-radius: 24px !important;
+        }
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.2.3",
+    "react-dom": "https://esm.sh/react-dom@^19.2.3",
+    "react-dom/client": "https://esm.sh/react-dom@^19.2.3/client",
+    "@google/genai": "https://esm.sh/@google/genai@^1.34.0",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react/": "https://esm.sh/react@^19.2.3/"
+  }
+}
+</script>
+</head>
+  <body class="bg-mint-subtle text-text-main font-display antialiased selection:bg-primary/30 min-h-screen">
+    <div id="root">
+      <!-- SEO Fallback Content (Visible to bots, hidden by React once loaded) -->
+      <div style="height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: sans-serif; text-align: center; padding: 20px;">
+        <h1 style="color: #13ec37; font-size: 2.5rem; margin-bottom: 10px;">ChefMistri</h1>
+        <p style="color: #666; font-size: 1.2rem; max-width: 600px;">
+          Your AI-powered kitchen companion. We're loading your personalized pantry and recipes...
+        </p>
+        <div style="margin-top: 20px; width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #13ec37; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+        <style>@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }</style>
+      </div>
+    </div>
+
+    <noscript>
+      <div style="padding: 20px; text-align: center; font-family: sans-serif;">
+        <h2>JavaScript Required</h2>
+        <p>ChefMistri requires JavaScript to generate AI recipes and manage your pantry. Please enable it in your browser settings.</p>
+      </div>
+    </noscript>
+
+    <!-- Environmental Shim -->
+    <script>
+      window.process = window.process || { env: { API_KEY: '' } };
+    </script>
+    <!-- Entry Point -->
+    <script type="module" src="./index.tsx"></script>
+  </body>
+</html>
