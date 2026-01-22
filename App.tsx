@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   ViewState, 
   Ingredient, 
@@ -13,6 +13,43 @@ import {
 import { 
   generateRecipesFromPantry 
 } from './geminiService.ts';
+
+/**
+ * Enhanced image component with immediate fallback to prevent broken UI.
+ */
+const RecipeImage: React.FC<{ src: string; alt: string; className?: string }> = ({ src, alt, className }) => {
+  const [hasError, setHasError] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fallback = `https://loremflickr.com/1000/1000/food,cooked,${encodeURIComponent(alt)}`;
+
+  useEffect(() => {
+    // Reset state when src changes
+    setHasError(false);
+    setIsLoading(true);
+  }, [src]);
+
+  return (
+    <div className={`relative bg-slate-100 flex items-center justify-center overflow-hidden ${className}`}>
+      {isLoading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-slate-50 z-10">
+          <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+        </div>
+      )}
+      <img 
+        src={hasError || !src ? fallback : src} 
+        alt={alt}
+        className={`w-full h-full object-cover transition-opacity duration-500 ${isLoading ? 'opacity-0' : 'opacity-100'}`}
+        onLoad={() => setIsLoading(false)}
+        onError={() => {
+          console.log("Image failed, using fallback for:", alt);
+          setHasError(true);
+          setIsLoading(false);
+        }}
+      />
+    </div>
+  );
+};
 
 const Navbar: React.FC<{ 
   currentView: ViewState; 
@@ -32,7 +69,7 @@ const Navbar: React.FC<{
       <nav className="hidden md:flex items-center gap-8">
         {[
           { id: 'recommendations', label: 'Recipes' },
-          { id: 'shopping-list', label: 'Meal Planner' },
+          { id: 'meal-planner', label: 'Meal Planner' },
           { id: 'pantry', label: 'My Pantry' },
           { id: 'profile', label: 'Profile' }
         ].map((link) => (
@@ -60,7 +97,7 @@ const Navbar: React.FC<{
   </header>
 );
 
-const App: React.FC = () => {
+export default function App() {
   const [view, setView] = useState<ViewState>('pantry');
   const [pantry, setPantry] = useState<Ingredient[]>([]);
   const [recommendations, setRecommendations] = useState<Recipe[]>(MOCK_RECIPES);
@@ -96,7 +133,9 @@ const App: React.FC = () => {
       setView('recommendations');
     } catch (err: any) {
       console.error(err);
-      setErrorMsg(err.message || "Chef AI hit a snag! Ensure your API key is configured correctly in Vercel.");
+      setErrorMsg(err.message || "Something went wrong. Please check your API key.");
+      // Even on error, show the recommendations view with mock data if needed
+      setView('recommendations');
     } finally {
       setIsGenerating(false);
     }
@@ -106,10 +145,10 @@ const App: React.FC = () => {
     switch (view) {
       case 'pantry':
         return (
-          <section className="px-6 py-12 lg:px-20 max-w-7xl mx-auto w-full flex-1">
+          <section className="px-6 py-12 lg:px-20 max-w-7xl mx-auto w-full flex-1 animate-in fade-in duration-500">
             <div className="flex flex-col lg:flex-row gap-12 items-start justify-between">
               <div className="flex-1 flex flex-col gap-12 w-full">
-                <div className="relative flex bg-white rounded-[2rem] overflow-hidden shadow-sm border border-slate-100 w-full max-w-2xl">
+                <div className="relative flex bg-white rounded-[2rem] overflow-hidden shadow-sm border border-slate-100 w-full max-w-2xl group focus-within:shadow-md transition-shadow">
                   <input 
                     className="flex-1 border-none focus:ring-0 text-xl font-bold px-10 py-6 text-slate-900 placeholder:text-slate-300" 
                     placeholder="Enter an ingredient..." 
@@ -141,10 +180,10 @@ const App: React.FC = () => {
 
               <div className="lg:w-[450px] w-full shrink-0">
                 <div className="bg-white rounded-[3rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] border border-slate-100 flex flex-col min-h-[550px] overflow-hidden">
-                  <div className="p-10 flex-1">
-                    <div className="flex flex-col gap-6">
+                  <div className="p-10 flex-1 overflow-y-auto max-h-[600px] scroll-smooth">
+                    <div className="flex flex-col gap-4">
                       {pantry.map(item => (
-                        <div key={item.id} className="flex items-center justify-between p-6 bg-slate-50/50 rounded-2xl border border-slate-100 group">
+                        <div key={item.id} className="flex items-center justify-between p-6 bg-slate-50/50 rounded-2xl border border-slate-100 group animate-in slide-in-from-right-4">
                           <span className="font-black text-slate-900 text-xl">{item.name}</span>
                           <button 
                             onClick={() => setPantry(pantry.filter(p => p.id !== item.id))} 
@@ -155,11 +194,11 @@ const App: React.FC = () => {
                         </div>
                       ))}
                       {pantry.length === 0 && (
-                        <div className="text-slate-300 font-bold italic py-20 text-center text-lg">Empty Pantry...</div>
+                        <div className="text-slate-300 font-bold italic py-24 text-center text-lg">Your pantry is empty...</div>
                       )}
                     </div>
                   </div>
-                  <div className="p-10">
+                  <div className="p-10 border-t border-slate-50">
                     <button 
                       disabled={pantry.length === 0}
                       onClick={generateAndSetRecipes} 
@@ -176,26 +215,41 @@ const App: React.FC = () => {
 
       case 'recommendations':
         return (
-          <section className="px-6 py-12 lg:px-20 max-w-7xl mx-auto w-full flex-1">
-            <h1 className="text-4xl font-black mb-10 text-slate-900">Recommended Recipes</h1>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <section className="px-6 py-12 lg:px-20 max-w-7xl mx-auto w-full flex-1 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="mb-12">
+              <h1 className="text-4xl font-black text-slate-900 mb-2">Recipe Ideas</h1>
+              <p className="text-slate-500 font-bold">Tailored suggestions based on your pantry</p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
               {recommendations.map(recipe => (
                 <div 
                   key={recipe.id} 
                   onClick={() => { setSelectedRecipe(recipe); setView('recipe-details'); }} 
-                  className="cursor-pointer group bg-white rounded-[2.5rem] overflow-hidden shadow-sm hover:shadow-xl transition-all border border-slate-100 flex flex-col"
+                  className="cursor-pointer group bg-white rounded-[2.5rem] overflow-hidden shadow-sm hover:shadow-2xl transition-all border border-slate-100 flex flex-col"
                 >
-                  <div className="aspect-video overflow-hidden bg-slate-100">
-                    <img 
-                      src={recipe.image} 
-                      onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=800'; }}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-                      alt={recipe.title} 
-                    />
-                  </div>
-                  <div className="p-8 flex-1">
-                    <h3 className="text-xl font-black text-slate-900 mb-2">{recipe.title}</h3>
-                    <p className="text-slate-500 text-sm font-medium line-clamp-2">{recipe.description}</p>
+                  <RecipeImage src={recipe.image} alt={recipe.title} className="aspect-[4/3]" />
+                  <div className="p-8 flex-1 flex flex-col">
+                    <div className="flex items-center justify-between mb-4">
+                      <span className="px-3 py-1 bg-slate-100 text-slate-500 text-[10px] font-black uppercase rounded tracking-widest">{recipe.difficulty}</span>
+                      <div className="flex items-center gap-1 text-primary">
+                        <span className="material-symbols-outlined text-sm font-bold">star</span>
+                        <span className="text-sm font-black">{recipe.matchPercentage}% match</span>
+                      </div>
+                    </div>
+                    <h3 className="text-2xl font-black text-slate-900 mb-3 group-hover:text-primary transition-colors">{recipe.title}</h3>
+                    <p className="text-slate-400 font-bold text-sm leading-relaxed mb-6 line-clamp-2">{recipe.description}</p>
+                    
+                    <div className="mt-auto flex items-center gap-6 text-xs font-black text-slate-300">
+                      <div className="flex items-center gap-2">
+                        <span className="material-symbols-outlined text-lg">schedule</span>
+                        {recipe.cookTime}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="material-symbols-outlined text-lg">restaurant</span>
+                        {recipe.servings} servings
+                      </div>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -206,30 +260,25 @@ const App: React.FC = () => {
       case 'recipe-details':
         if (!selectedRecipe) return null;
         return (
-          <main className="w-full max-w-6xl mx-auto px-6 py-12 flex-1">
-            <button onClick={() => setView('recommendations')} className="flex items-center gap-2 font-bold text-slate-400 mb-8 hover:text-primary transition-colors">
+          <main className="w-full max-w-6xl mx-auto px-6 py-12 flex-1 animate-in fade-in duration-500">
+            <button onClick={() => setView('recommendations')} className="flex items-center gap-2 font-black text-slate-300 mb-10 hover:text-primary transition-colors">
               <span className="material-symbols-outlined">arrow_back</span> Back to Recipes
             </button>
             <div className="flex flex-col lg:flex-row gap-16">
               <div className="lg:w-1/2 w-full">
-                <img 
-                  src={selectedRecipe.image} 
-                  onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=800'; }}
-                  className="w-full aspect-square object-cover rounded-[4rem] shadow-xl" 
-                  alt={selectedRecipe.title} 
-                />
+                <RecipeImage src={selectedRecipe.image} alt={selectedRecipe.title} className="w-full aspect-square rounded-[4rem] shadow-2xl" />
               </div>
               <div className="lg:w-1/2 w-full flex flex-col gap-8">
                 <h1 className="text-6xl font-black text-slate-900 leading-tight">{selectedRecipe.title}</h1>
-                <p className="text-xl font-bold text-slate-500 leading-relaxed">{selectedRecipe.description}</p>
+                <p className="text-xl font-bold text-slate-400 leading-relaxed">{selectedRecipe.description}</p>
                 
-                <div className="bg-white p-10 rounded-[3rem] border border-slate-100 shadow-sm">
-                  <h3 className="text-2xl font-black mb-6">Ingredients</h3>
-                  <div className="grid grid-cols-1 gap-4">
+                <div className="bg-white p-12 rounded-[4rem] border border-slate-100 shadow-sm">
+                  <h3 className="text-3xl font-black mb-8 text-slate-900">Ingredients</h3>
+                  <div className="grid grid-cols-1 gap-6">
                     {selectedRecipe.ingredients.map((ing, i) => (
-                      <div key={i} className="flex justify-between font-bold text-slate-700 p-3 border-b border-slate-50">
-                        <span className="text-lg">{ing.name}</span>
-                        <span className="text-primary text-lg">{ing.amount}</span>
+                      <div key={i} className="flex justify-between font-black text-slate-700 pb-4 border-b border-slate-50 last:border-0">
+                        <span className="text-xl">{ing.name}</span>
+                        <span className="text-primary text-xl">{ing.amount}</span>
                       </div>
                     ))}
                   </div>
@@ -240,7 +289,7 @@ const App: React.FC = () => {
         );
 
       default:
-        return <div className="p-20 text-center font-bold text-slate-300">Section Under Construction</div>;
+        return <div className="p-20 text-center font-bold text-slate-300">Coming Soon</div>;
     }
   };
 
@@ -253,24 +302,24 @@ const App: React.FC = () => {
       </main>
       
       {isGenerating && (
-        <div className="fixed inset-0 z-[200] bg-slate-900/40 backdrop-blur-md flex items-center justify-center">
-          <div className="bg-white p-12 rounded-[3.5rem] shadow-2xl flex flex-col items-center gap-8 text-center max-w-md">
-            <div className="size-20 border-[6px] border-primary border-t-transparent rounded-full animate-spin" />
+        <div className="fixed inset-0 z-[200] bg-slate-900/40 backdrop-blur-md flex items-center justify-center animate-in fade-in duration-300">
+          <div className="bg-white p-16 rounded-[4rem] shadow-2xl flex flex-col items-center gap-10 text-center max-w-md">
+            <div className="size-24 border-[8px] border-primary/20 border-t-primary rounded-full animate-spin" />
             <div>
-              <h4 className="font-black text-2xl text-slate-900 mb-2">Chef AI is Cooking...</h4>
-              <p className="text-slate-500 font-bold">Generating unique recipes and high-quality food photography for your ingredients.</p>
+              <h4 className="font-black text-3xl text-slate-900 mb-3">Chef AI is Cooking...</h4>
+              <p className="text-slate-400 font-bold text-lg">We're dreaming up gourmet recipes and high-res photos just for you.</p>
             </div>
           </div>
         </div>
       )}
 
       {errorMsg && (
-        <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[300] bg-[#e63946] text-white px-10 py-6 rounded-3xl font-bold shadow-2xl flex items-center gap-6 max-w-2xl animate-in fade-in slide-in-from-bottom-6">
+        <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[300] bg-[#e63946] text-white px-10 py-6 rounded-3xl font-bold shadow-2xl flex items-center gap-6 max-w-2xl animate-in fade-in slide-in-from-bottom-6 duration-300">
           <div className="bg-white/20 p-3 rounded-full flex items-center justify-center">
              <span className="material-symbols-outlined text-white text-[28px]">error_outline</span>
           </div>
           <div className="flex-1">
-            <p className="text-sm opacity-90 font-black mb-0.5">Configuration Note:</p>
+            <p className="text-sm opacity-90 font-black mb-0.5">Configuration Alert:</p>
             <p className="text-sm leading-tight">{errorMsg}</p>
           </div>
           <button onClick={() => setErrorMsg(null)} className="p-2 hover:bg-white/10 rounded-full transition-colors">
@@ -280,6 +329,4 @@ const App: React.FC = () => {
       )}
     </div>
   );
-};
-
-export default App;
+}

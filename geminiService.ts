@@ -33,7 +33,7 @@ const extractJSON = (text: string) => {
 const getAI = () => {
   const apiKey = process.env.API_KEY;
   if (!apiKey) {
-    throw new Error("API_KEY is missing. Since you added it to Vercel, please trigger a NEW DEPLOYMENT for the environment variables to take effect.");
+    return null;
   }
   return new GoogleGenAI({ apiKey });
 };
@@ -42,12 +42,17 @@ const getAI = () => {
  * Generates a high-quality food image for a given recipe title.
  */
 export const generateAIImage = async (prompt: string): Promise<string> => {
+  const fallback = `https://source.unsplash.com/1000x1000/?food,cooked,${encodeURIComponent(prompt.split(' ').slice(0, 2).join(','))}`;
+  const secondaryFallback = `https://loremflickr.com/1000/1000/food,cooked,${encodeURIComponent(prompt)}`;
+  
   try {
     const ai = getAI();
+    if (!ai) return fallback;
+
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash-image',
       contents: {
-        parts: [{ text: `A professional, high-resolution food photography shot of ${prompt}. Gourmet presentation on a clean plate, natural lighting, soft bokeh background, delicious and appetizing.` }],
+        parts: [{ text: `A professional food photography shot of ${prompt}. Gourmet presentation, vibrant colors, bokeh background, 4k.` }],
       },
       config: {
         imageConfig: { aspectRatio: "1:1" },
@@ -62,11 +67,10 @@ export const generateAIImage = async (prompt: string): Promise<string> => {
         }
       }
     }
-    // Final fallback to a reliable Unsplash food image if AI fails
-    return `https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=800`;
+    return fallback;
   } catch (error) {
-    console.error("Image generation failed:", error);
-    return `https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=800`;
+    console.error("AI Image generation failed, using fallback:", error);
+    return fallback;
   }
 };
 
@@ -111,6 +115,10 @@ export const generateRecipesFromPantry = async (ingredients: string[], prefs: Us
   if (ingredients.length === 0) return [];
   
   const ai = getAI();
+  if (!ai) {
+    throw new Error("API_KEY is missing. Since you added it to Vercel, please trigger a NEW DEPLOYMENT.");
+  }
+
   const prompt = `Return strictly a JSON array of 3 creative recipes using these ingredients: ${ingredients.join(', ')}. 
   Diet: ${prefs.dietType}. Allergies: ${prefs.allergies.join(', ') || 'None'}. Level: ${prefs.skillLevel}. 
   Do not include markdown headers. Output ONLY JSON.`;
@@ -130,17 +138,17 @@ export const generateRecipesFromPantry = async (ingredients: string[], prefs: Us
 
     const results = extractJSON(response.text || "[]");
     
-    // Generate real images for each recipe in parallel
-    const recipesWithImages = await Promise.all(results.map(async (r: any) => {
+    const recipes: Recipe[] = [];
+    for (const r of results) {
       const image = await generateAIImage(r.title);
-      return {
+      recipes.push({
         ...r,
         id: r.id || Math.random().toString(36).substr(2, 9),
         image
-      };
-    }));
+      });
+    }
 
-    return recipesWithImages;
+    return recipes;
   } catch (error: any) {
     console.error("Gemini Recipe Generation Error:", error);
     throw error;
