@@ -1,5 +1,5 @@
 import { GoogleGenAI, Type } from "@google/genai";
-import { Recipe, UserPreferences, MealPlan, DayOfWeek, MealSlot } from "./types.ts";
+import { Recipe, UserPreferences } from "./types.ts";
 
 const extractJSON = (text: string) => {
   try {
@@ -31,31 +31,26 @@ const extractJSON = (text: string) => {
 };
 
 const getAI = () => {
-  // Access the pre-configured API key from the environment.
   const apiKey = process.env.API_KEY;
   if (!apiKey) {
-    throw new Error("API_KEY is missing. Since you added it to Vercel, please trigger a NEW DEPLOYMENT for the changes to take effect.");
+    throw new Error("API_KEY is missing. Since you added it to Vercel, please trigger a NEW DEPLOYMENT for the environment variables to take effect.");
   }
   return new GoogleGenAI({ apiKey });
 };
 
-const DAYS: DayOfWeek[] = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-const SLOTS: MealSlot[] = ['Breakfast', 'Lunch', 'Dinner'];
-
-const getFastPlaceholder = (query: string) => {
-  return `https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=800&q=${encodeURIComponent(query)}`;
-};
-
+/**
+ * Generates a high-quality food image for a given recipe title.
+ */
 export const generateAIImage = async (prompt: string): Promise<string> => {
   try {
     const ai = getAI();
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash-image',
       contents: {
-        parts: [{ text: `A professional food photography shot of ${prompt}. Gourmet presentation, white plate, bokeh background.` }],
+        parts: [{ text: `A professional, high-resolution food photography shot of ${prompt}. Gourmet presentation on a clean plate, natural lighting, soft bokeh background, delicious and appetizing.` }],
       },
       config: {
-        imageConfig: { aspectRatio: "16:9" },
+        imageConfig: { aspectRatio: "1:1" },
       },
     });
 
@@ -67,10 +62,11 @@ export const generateAIImage = async (prompt: string): Promise<string> => {
         }
       }
     }
-    return getFastPlaceholder(prompt);
+    // Final fallback to a reliable Unsplash food image if AI fails
+    return `https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=800`;
   } catch (error) {
     console.error("Image generation failed:", error);
-    return getFastPlaceholder(prompt);
+    return `https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=800`;
   }
 };
 
@@ -133,76 +129,20 @@ export const generateRecipesFromPantry = async (ingredients: string[], prefs: Us
     });
 
     const results = extractJSON(response.text || "[]");
-    return results.map((r: any) => ({
-      ...r,
-      id: r.id || Math.random().toString(36).substr(2, 9),
-      image: `https://loremflickr.com/800/600/food,cooked,${encodeURIComponent(r.title)}`
+    
+    // Generate real images for each recipe in parallel
+    const recipesWithImages = await Promise.all(results.map(async (r: any) => {
+      const image = await generateAIImage(r.title);
+      return {
+        ...r,
+        id: r.id || Math.random().toString(36).substr(2, 9),
+        image
+      };
     }));
+
+    return recipesWithImages;
   } catch (error: any) {
     console.error("Gemini Recipe Generation Error:", error);
-    throw error;
-  }
-};
-
-export const generateWeeklyPlan = async (ingredients: string[], prefs: UserPreferences): Promise<MealPlan> => {
-  const ai = getAI();
-  const prompt = `Return strictly a JSON object for a 7-day meal plan (21 meals total). 
-  Pantry: ${ingredients.join(', ')}. Diet: ${prefs.dietType}. 
-  Do not include markdown headers. Output ONLY JSON.`;
-
-  try {
-    const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
-      contents: prompt,
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            meals: {
-              type: Type.ARRAY,
-              items: {
-                type: Type.OBJECT,
-                properties: {
-                  day: { type: Type.STRING, enum: DAYS },
-                  slot: { type: Type.STRING, enum: SLOTS },
-                  recipe: fullRecipeSchema
-                },
-                required: ["day", "slot", "recipe"]
-              }
-            }
-          }
-        }
-      }
-    });
-
-    const data = extractJSON(response.text || "{\"meals\":[]}");
-    const plan: MealPlan = {
-      Monday: { Breakfast: null, Lunch: null, Dinner: null },
-      Tuesday: { Breakfast: null, Lunch: null, Dinner: null },
-      Wednesday: { Breakfast: null, Lunch: null, Dinner: null },
-      Thursday: { Breakfast: null, Lunch: null, Dinner: null },
-      Friday: { Breakfast: null, Lunch: null, Dinner: null },
-      Saturday: { Breakfast: null, Lunch: null, Dinner: null },
-      Sunday: { Breakfast: null, Lunch: null, Dinner: null },
-    };
-
-    if (data.meals && Array.isArray(data.meals)) {
-      for (const item of data.meals) {
-        if (item.day && item.slot && item.recipe) {
-          const r = item.recipe;
-          plan[item.day as DayOfWeek][item.slot as MealSlot] = {
-            ...r,
-            id: r.id || Math.random().toString(36).substr(2, 9),
-            image: `https://loremflickr.com/400/300/food,${encodeURIComponent(r.title)}`,
-            tags: r.tags || ['Planned']
-          } as Recipe;
-        }
-      }
-    }
-    return plan;
-  } catch (error: any) {
-    console.error("Gemini Weekly Plan Error:", error);
     throw error;
   }
 };

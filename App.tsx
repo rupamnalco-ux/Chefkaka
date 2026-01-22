@@ -4,7 +4,6 @@ import {
   Ingredient, 
   Recipe, 
   UserPreferences,
-  MealPlan
 } from './types.ts';
 import { 
   INITIAL_PREFERENCES, 
@@ -12,24 +11,23 @@ import {
   MOCK_RECIPES 
 } from './constants.tsx';
 import { 
-  generateRecipesFromPantry, 
-  generateWeeklyPlan
+  generateRecipesFromPantry 
 } from './geminiService.ts';
 
 const Navbar: React.FC<{ 
   currentView: ViewState; 
   onNavigate: (view: ViewState) => void 
 }> = ({ currentView, onNavigate }) => (
-  <header className="sticky top-0 z-50 flex items-center justify-between bg-white px-6 py-4 lg:px-16 border-b border-slate-100 print:hidden">
-    <div className="flex items-center gap-12">
+  <header className="sticky top-0 z-50 flex items-center justify-between bg-white px-6 py-4 lg:px-16 border-b border-slate-50 print:hidden">
+    <div className="flex items-center gap-10">
       <div 
-        className="flex items-center gap-2 text-primary cursor-pointer select-none group"
-        onClick={() => onNavigate('landing')}
+        className="flex items-center gap-2 text-primary cursor-pointer select-none"
+        onClick={() => onNavigate('pantry')}
       >
-        <div className="size-8 flex items-center justify-center bg-primary rounded-lg shadow-sm">
+        <div className="size-8 flex items-center justify-center bg-primary rounded-lg">
           <span className="material-symbols-outlined !text-[20px] text-white font-black">nutrition</span>
         </div>
-        <h2 className="text-xl font-black leading-tight tracking-[-0.03em] text-slate-900">ChefMistri</h2>
+        <h2 className="text-xl font-black tracking-tight text-slate-900">ChefMistri</h2>
       </div>
       <nav className="hidden md:flex items-center gap-8">
         {[
@@ -41,8 +39,8 @@ const Navbar: React.FC<{
           <button
             key={link.id}
             onClick={() => onNavigate(link.id as ViewState)}
-            className={`text-sm font-bold tracking-tight transition-all duration-200 py-1 border-b-2 ${
-              currentView === link.id ? 'text-primary border-primary' : 'text-slate-500 border-transparent hover:text-primary'
+            className={`text-sm font-bold tracking-tight transition-all py-1 ${
+              currentView === link.id ? 'text-primary border-b-2 border-primary' : 'text-slate-500 hover:text-primary'
             }`}
           >
             {link.label}
@@ -50,11 +48,11 @@ const Navbar: React.FC<{
         ))}
       </nav>
     </div>
-    <div className="flex items-center gap-4">
+    <div className="flex items-center gap-6">
       <button className="text-sm font-bold text-slate-900 px-4 py-2 hover:bg-slate-50 rounded-lg transition-colors">Log In</button>
       <button 
         onClick={() => onNavigate('pantry')}
-        className="bg-primary text-white text-sm font-black px-8 py-2.5 rounded-lg hover:bg-primary-hover transition-all shadow-md active:scale-95"
+        className="bg-primary text-white text-sm font-black px-8 py-2.5 rounded-lg hover:bg-primary-hover transition-all shadow-sm active:scale-95"
       >
         Get Started
       </button>
@@ -74,6 +72,9 @@ const App: React.FC = () => {
 
   const handleAddIngredient = (name: string) => {
     if (!name.trim()) return;
+    const exists = pantry.find(p => p.name.toLowerCase() === name.toLowerCase());
+    if (exists) return;
+    
     const newItem: Ingredient = { 
       id: Date.now().toString(), 
       name: name.trim(), 
@@ -95,7 +96,7 @@ const App: React.FC = () => {
       setView('recommendations');
     } catch (err: any) {
       console.error(err);
-      setErrorMsg(err.message || "Chef AI hit a snag!");
+      setErrorMsg(err.message || "Chef AI hit a snag! Ensure your API key is configured correctly in Vercel.");
     } finally {
       setIsGenerating(false);
     }
@@ -106,12 +107,11 @@ const App: React.FC = () => {
       case 'pantry':
         return (
           <section className="px-6 py-12 lg:px-20 max-w-7xl mx-auto w-full flex-1">
-            <div className="flex flex-col lg:flex-row gap-8 items-start">
-              {/* Left Column: Input and Quick Selection */}
-              <div className="flex-1 flex flex-col gap-10">
-                <div className="flex bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-100 max-w-2xl w-full p-1.5">
+            <div className="flex flex-col lg:flex-row gap-12 items-start justify-between">
+              <div className="flex-1 flex flex-col gap-12 w-full">
+                <div className="relative flex bg-white rounded-[2rem] overflow-hidden shadow-sm border border-slate-100 w-full max-w-2xl">
                   <input 
-                    className="flex-1 border-none focus:ring-0 text-lg font-bold px-6 text-slate-900 placeholder:text-slate-300" 
+                    className="flex-1 border-none focus:ring-0 text-xl font-bold px-10 py-6 text-slate-900 placeholder:text-slate-300" 
                     placeholder="Enter an ingredient..." 
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
@@ -119,49 +119,51 @@ const App: React.FC = () => {
                   />
                   <button 
                     onClick={() => handleAddIngredient(inputValue)}
-                    className="bg-primary text-white font-black px-10 py-3.5 rounded-xl hover:bg-primary-hover transition-all active:scale-95"
+                    className="bg-primary text-white font-black px-12 text-xl hover:bg-primary-hover transition-all active:scale-95 m-1 rounded-[1.8rem]"
                   >
                     Add
                   </button>
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 max-w-3xl">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 max-w-3xl">
                   {COMMON_STAPLES.map((staple) => (
                     <button 
                       key={staple.name} 
                       onClick={() => handleAddIngredient(staple.name)} 
-                      className="bg-white rounded-[2rem] p-8 flex flex-col items-center gap-4 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all group border border-slate-50"
+                      className="bg-white rounded-[2.5rem] p-10 flex flex-col items-center gap-4 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all group border border-slate-50"
                     >
                       <span className="material-symbols-outlined text-4xl" style={{color: staple.color}}>{staple.icon}</span>
-                      <span className="font-black text-slate-800 text-lg">{staple.name}</span>
+                      <span className="font-black text-slate-900 text-lg">{staple.name}</span>
                     </button>
                   ))}
                 </div>
               </div>
 
-              {/* Right Column: Selected Items List */}
-              <div className="lg:w-[420px] w-full shrink-0">
-                <div className="bg-white rounded-[2.5rem] shadow-xl border border-slate-100 flex flex-col min-h-[500px]">
-                  <div className="p-8 flex-1 flex flex-col">
-                    <div className="flex flex-col gap-3 overflow-y-auto max-h-[450px] pr-2 custom-scrollbar">
+              <div className="lg:w-[450px] w-full shrink-0">
+                <div className="bg-white rounded-[3rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] border border-slate-100 flex flex-col min-h-[550px] overflow-hidden">
+                  <div className="p-10 flex-1">
+                    <div className="flex flex-col gap-6">
                       {pantry.map(item => (
-                        <div key={item.id} className="flex items-center justify-between p-4 bg-white border border-slate-100 rounded-2xl shadow-sm hover:border-primary/20 transition-colors">
-                          <span className="font-black text-slate-900 text-lg">{item.name}</span>
+                        <div key={item.id} className="flex items-center justify-between p-6 bg-slate-50/50 rounded-2xl border border-slate-100 group">
+                          <span className="font-black text-slate-900 text-xl">{item.name}</span>
                           <button 
                             onClick={() => setPantry(pantry.filter(p => p.id !== item.id))} 
-                            className="text-slate-200 hover:text-red-500 transition-colors"
+                            className="text-slate-300 hover:text-red-500 transition-colors"
                           >
-                            <span className="material-symbols-outlined text-[20px]">close</span>
+                            <span className="material-symbols-outlined text-2xl">close</span>
                           </button>
                         </div>
                       ))}
+                      {pantry.length === 0 && (
+                        <div className="text-slate-300 font-bold italic py-20 text-center text-lg">Empty Pantry...</div>
+                      )}
                     </div>
                   </div>
-                  <div className="p-8 pt-0">
+                  <div className="p-10">
                     <button 
                       disabled={pantry.length === 0}
                       onClick={generateAndSetRecipes} 
-                      className="w-full py-5 bg-primary text-white rounded-2xl font-black text-xl shadow-lg shadow-primary/20 disabled:opacity-50 hover:bg-primary-hover transition-all active:scale-[0.98]"
+                      className="w-full py-7 bg-primary text-white rounded-[2rem] font-black text-2xl shadow-xl shadow-primary/20 disabled:opacity-50 hover:bg-primary-hover transition-all active:scale-[0.98]"
                     >
                       Generate Recipes
                     </button>
@@ -181,12 +183,17 @@ const App: React.FC = () => {
                 <div 
                   key={recipe.id} 
                   onClick={() => { setSelectedRecipe(recipe); setView('recipe-details'); }} 
-                  className="cursor-pointer group bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-slate-100"
+                  className="cursor-pointer group bg-white rounded-[2.5rem] overflow-hidden shadow-sm hover:shadow-xl transition-all border border-slate-100 flex flex-col"
                 >
                   <div className="aspect-video overflow-hidden bg-slate-100">
-                    <img src={recipe.image} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt={recipe.title} />
+                    <img 
+                      src={recipe.image} 
+                      onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=800'; }}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                      alt={recipe.title} 
+                    />
                   </div>
-                  <div className="p-8">
+                  <div className="p-8 flex-1">
                     <h3 className="text-xl font-black text-slate-900 mb-2">{recipe.title}</h3>
                     <p className="text-slate-500 text-sm font-medium line-clamp-2">{recipe.description}</p>
                   </div>
@@ -199,22 +206,30 @@ const App: React.FC = () => {
       case 'recipe-details':
         if (!selectedRecipe) return null;
         return (
-          <main className="w-full max-w-5xl mx-auto px-6 py-12 flex-1">
-            <div className="flex flex-col lg:flex-row gap-12">
+          <main className="w-full max-w-6xl mx-auto px-6 py-12 flex-1">
+            <button onClick={() => setView('recommendations')} className="flex items-center gap-2 font-bold text-slate-400 mb-8 hover:text-primary transition-colors">
+              <span className="material-symbols-outlined">arrow_back</span> Back to Recipes
+            </button>
+            <div className="flex flex-col lg:flex-row gap-16">
               <div className="lg:w-1/2 w-full">
-                <img src={selectedRecipe.image} className="w-full aspect-square object-cover rounded-[3rem] shadow-xl" alt={selectedRecipe.title} />
+                <img 
+                  src={selectedRecipe.image} 
+                  onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=800'; }}
+                  className="w-full aspect-square object-cover rounded-[4rem] shadow-xl" 
+                  alt={selectedRecipe.title} 
+                />
               </div>
-              <div className="lg:w-1/2 w-full flex flex-col gap-6">
-                <h1 className="text-5xl font-black text-slate-900 leading-tight">{selectedRecipe.title}</h1>
-                <p className="text-lg font-bold text-slate-400">{selectedRecipe.description}</p>
+              <div className="lg:w-1/2 w-full flex flex-col gap-8">
+                <h1 className="text-6xl font-black text-slate-900 leading-tight">{selectedRecipe.title}</h1>
+                <p className="text-xl font-bold text-slate-500 leading-relaxed">{selectedRecipe.description}</p>
                 
-                <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm">
-                  <h3 className="text-xl font-black mb-4">Ingredients</h3>
-                  <div className="grid grid-cols-1 gap-3">
+                <div className="bg-white p-10 rounded-[3rem] border border-slate-100 shadow-sm">
+                  <h3 className="text-2xl font-black mb-6">Ingredients</h3>
+                  <div className="grid grid-cols-1 gap-4">
                     {selectedRecipe.ingredients.map((ing, i) => (
-                      <div key={i} className="flex justify-between font-bold text-slate-700 p-2 border-b border-slate-50">
-                        <span>{ing.name}</span>
-                        <span className="text-primary">{ing.amount}</span>
+                      <div key={i} className="flex justify-between font-bold text-slate-700 p-3 border-b border-slate-50">
+                        <span className="text-lg">{ing.name}</span>
+                        <span className="text-primary text-lg">{ing.amount}</span>
                       </div>
                     ))}
                   </div>
@@ -224,28 +239,8 @@ const App: React.FC = () => {
           </main>
         );
 
-      case 'landing':
-        return (
-          <section className="mx-auto max-w-7xl px-6 lg:px-12 py-24 text-center lg:text-left grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div className="flex flex-col items-center lg:items-start">
-              <h1 className="text-7xl font-black text-slate-900 mb-8 leading-tight tracking-tighter">
-                Cook with <br /><span className="text-primary">Confidence.</span>
-              </h1>
-              <p className="text-xl text-slate-500 mb-10 max-w-md font-medium">
-                The smart way to manage your pantry and find the perfect meal for your ingredients.
-              </p>
-              <button 
-                onClick={() => setView('pantry')} 
-                className="bg-primary text-white px-12 py-5 rounded-2xl font-black text-xl shadow-lg hover:scale-105 transition-all"
-              >
-                Go to Pantry
-              </button>
-            </div>
-            <img src="https://thedeliciousplate.com/wp-content/uploads/2019/07/cropped-IMG_5672.jpg" className="rounded-[3rem] shadow-2xl" alt="ChefMistri Hero" />
-          </section>
-        );
-
-      default: return null;
+      default:
+        return <div className="p-20 text-center font-bold text-slate-300">Section Under Construction</div>;
     }
   };
 
@@ -258,25 +253,28 @@ const App: React.FC = () => {
       </main>
       
       {isGenerating && (
-        <div className="fixed inset-0 z-[200] bg-slate-900/40 backdrop-blur-sm flex items-center justify-center">
-          <div className="bg-white p-10 rounded-[2.5rem] shadow-2xl flex flex-col items-center gap-6">
-            <div className="size-16 border-[5px] border-primary border-t-transparent rounded-full animate-spin" />
-            <h4 className="font-black text-xl text-slate-900">AI is cooking up recipes...</h4>
+        <div className="fixed inset-0 z-[200] bg-slate-900/40 backdrop-blur-md flex items-center justify-center">
+          <div className="bg-white p-12 rounded-[3.5rem] shadow-2xl flex flex-col items-center gap-8 text-center max-w-md">
+            <div className="size-20 border-[6px] border-primary border-t-transparent rounded-full animate-spin" />
+            <div>
+              <h4 className="font-black text-2xl text-slate-900 mb-2">Chef AI is Cooking...</h4>
+              <p className="text-slate-500 font-bold">Generating unique recipes and high-quality food photography for your ingredients.</p>
+            </div>
           </div>
         </div>
       )}
 
       {errorMsg && (
-        <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[300] bg-red-600 text-white px-8 py-4 rounded-3xl font-bold shadow-2xl flex items-center gap-5 max-w-xl animate-in fade-in slide-in-from-bottom-4">
-          <div className="bg-white/20 p-2 rounded-full">
-             <span className="material-symbols-outlined text-white text-[24px]">error_outline</span>
+        <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[300] bg-[#e63946] text-white px-10 py-6 rounded-3xl font-bold shadow-2xl flex items-center gap-6 max-w-2xl animate-in fade-in slide-in-from-bottom-6">
+          <div className="bg-white/20 p-3 rounded-full flex items-center justify-center">
+             <span className="material-symbols-outlined text-white text-[28px]">error_outline</span>
           </div>
           <div className="flex-1">
-            <p className="text-sm opacity-90 font-black">AI Error:</p>
+            <p className="text-sm opacity-90 font-black mb-0.5">Configuration Note:</p>
             <p className="text-sm leading-tight">{errorMsg}</p>
           </div>
           <button onClick={() => setErrorMsg(null)} className="p-2 hover:bg-white/10 rounded-full transition-colors">
-            <span className="material-symbols-outlined">close</span>
+            <span className="material-symbols-outlined text-2xl">close</span>
           </button>
         </div>
       )}

@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 export const INITIAL_PREFERENCES = {
@@ -24,7 +23,7 @@ export const MOCK_RECIPES = [
     id: '1',
     title: 'Lemon Herb Chicken Rice',
     description: 'A zesty and fresh dinner using your chicken breast, rice, and bell peppers.',
-    image: 'https://s3.amazonaws.com/grazecart/fergusonfarmbirds/images/1722814703_66b010efef97b.jpg',
+    image: 'https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?auto=format&fit=crop&q=80&w=800',
     prepTime: '30m',
     cookTime: '20m',
     servings: 2,
@@ -40,7 +39,7 @@ export const MOCK_RECIPES = [
     id: '2',
     title: 'Stuffed Bell Peppers',
     description: 'Classic comfort food. Uses your bell peppers as the vessel for a savory rice and chicken mix.',
-    image: 'https://hips.hearstapps.com/hmg-prod/images/stuffed-peppers-recipe-2-6594706a0a63b.jpg?crop=0.8888888888888888xw:1xh;center,top&resize=1200:*',
+    image: 'https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&q=80&w=800',
     prepTime: '45m',
     cookTime: '30m',
     servings: 4,
