@@ -21,10 +21,11 @@ const RecipeImage: React.FC<{ src: string; alt: string; className?: string }> = 
   const [hasError, setHasError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fallback = `https://loremflickr.com/1000/1000/food,cooked,${encodeURIComponent(alt)}`;
+  // Reliable fallback that generates an AI image based on the title if the main source fails
+  // Uses a simple seed to ensure consistency without caching issues
+  const fallback = `https://image.pollinations.ai/prompt/delicious%20${encodeURIComponent(alt)}%20plated%20food?width=800&height=800&model=flux&seed=${alt.length}`;
 
   useEffect(() => {
-    // Reset state when src changes
     setHasError(false);
     setIsLoading(true);
   }, [src]);
@@ -39,12 +40,16 @@ const RecipeImage: React.FC<{ src: string; alt: string; className?: string }> = 
       <img 
         src={hasError || !src ? fallback : src} 
         alt={alt}
+        loading="lazy"
+        referrerPolicy="no-referrer"
         className={`w-full h-full object-cover transition-opacity duration-500 ${isLoading ? 'opacity-0' : 'opacity-100'}`}
         onLoad={() => setIsLoading(false)}
         onError={() => {
-          console.log("Image failed, using fallback for:", alt);
-          setHasError(true);
-          setIsLoading(false);
+          if (!hasError) {
+             console.warn("Image failed to load, switching to fallback:", alt);
+             setHasError(true);
+             setIsLoading(false);
+          }
         }}
       />
     </div>
