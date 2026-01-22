@@ -1,16 +1,10 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { Recipe, UserPreferences, MealPlan, DayOfWeek, MealSlot } from "./types.ts";
 
-/**
- * Robust JSON extraction. 
- * Gemini often wraps responses in markdown blocks like ```json ... ```
- */
 const extractJSON = (text: string) => {
   try {
-    // Attempt standard parse first
     return JSON.parse(text);
   } catch (e) {
-    // If it fails, try to extract content between triple backticks
     const match = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
     if (match && match[1]) {
       try {
@@ -19,7 +13,6 @@ const extractJSON = (text: string) => {
         console.error("Failed to parse extracted JSON:", e2);
       }
     }
-    // Final fallback: try to find the first '[' or '{' and last ']' or '}'
     const firstBracket = Math.min(
       text.indexOf('[') === -1 ? Infinity : text.indexOf('['),
       text.indexOf('{') === -1 ? Infinity : text.indexOf('{')
@@ -38,9 +31,10 @@ const extractJSON = (text: string) => {
 };
 
 const getAI = () => {
-  const apiKey = (typeof process !== 'undefined' && process.env?.API_KEY) || '';
+  // Access the pre-configured API key from the environment.
+  const apiKey = process.env.API_KEY;
   if (!apiKey) {
-    console.error("CRITICAL: API_KEY is missing from Environment Variables!");
+    throw new Error("API_KEY is missing. Since you added it to Vercel, please trigger a NEW DEPLOYMENT for the changes to take effect.");
   }
   return new GoogleGenAI({ apiKey });
 };
@@ -123,7 +117,7 @@ export const generateRecipesFromPantry = async (ingredients: string[], prefs: Us
   const ai = getAI();
   const prompt = `Return strictly a JSON array of 3 creative recipes using these ingredients: ${ingredients.join(', ')}. 
   Diet: ${prefs.dietType}. Allergies: ${prefs.allergies.join(', ') || 'None'}. Level: ${prefs.skillLevel}. 
-  Do not include markdown headers or conversational text. Output ONLY the JSON.`;
+  Do not include markdown headers. Output ONLY JSON.`;
 
   try {
     const response = await ai.models.generateContent({
@@ -139,7 +133,6 @@ export const generateRecipesFromPantry = async (ingredients: string[], prefs: Us
     });
 
     const results = extractJSON(response.text || "[]");
-    
     return results.map((r: any) => ({
       ...r,
       id: r.id || Math.random().toString(36).substr(2, 9),
