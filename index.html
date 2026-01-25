@@ -69,6 +69,15 @@
         -moz-appearance: textfield;
       }
 
+      /* Utility to hide scrollbars but keep functionality */
+      .no-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+
       @media print {
         @page { margin: 1.5cm; size: auto; }
         body { background: white !important; color: black !important; print-color-adjust: exact; -webkit-print-color-adjust: exact; }

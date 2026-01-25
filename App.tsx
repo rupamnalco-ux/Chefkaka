@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   ViewState, 
   Ingredient, 
@@ -187,6 +187,13 @@ export default function App() {
   const [inputUnit, setInputUnit] = useState<string>('pcs');
   const [searchQuery, setSearchQuery] = useState('');
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [showAllStaples, setShowAllStaples] = useState(false);
+
+  // --- Meal Planner State Extensions ---
+  const [weeks, setWeeks] = useState<number[]>([0]); // Starts with current week
+  const topSentinelRef = useRef<HTMLDivElement>(null);
+  const bottomSentinelRef = useRef<HTMLDivElement>(null);
+  const horizontalScrollRefs = useRef<Record<number, HTMLDivElement | null>>({});
 
   const [shoppingList, setShoppingList] = useState<ShoppingItem[]>([
     { id: '1', name: 'Roma Tomatoes', category: 'Produce', completed: false, amount: '4 large' },
@@ -200,12 +207,6 @@ export default function App() {
 
   const [mealPlan, setMealPlan] = useState<Record<string, Record<MealSlot, { title: string; calories?: string; image?: string } | null>>>({
     'MON 23': { Breakfast: null, Lunch: MOCK_RECIPES[0], Dinner: MOCK_RECIPES[1] },
-    'TUE 24': { Breakfast: { title: 'Greek Yogurt Bowl', calories: '320 kcal' }, Lunch: null, Dinner: { title: 'Chicken Stir-fry', calories: '480 kcal' } },
-    'WED 25': { Breakfast: null, Lunch: { title: 'Turkey Club Sandwich', calories: '510 kcal' }, Dinner: null },
-    'THU 26': { Breakfast: null, Lunch: null, Dinner: null },
-    'FRI 27': { Breakfast: null, Lunch: null, Dinner: null },
-    'SAT 28': { Breakfast: null, Lunch: null, Dinner: null },
-    'SUN 29': { Breakfast: null, Lunch: null, Dinner: null },
   });
 
   const SAVED_RECIPES_MOCK: Recipe[] = useMemo(() => [
@@ -261,6 +262,61 @@ export default function App() {
         Dinner: { title: source[Math.floor(Math.random() * source.length)].title, calories: '480 kcal' }
       }
     }));
+  };
+
+  // --- Date Logic for Planner ---
+  const getDaysForWeek = (weekOffset: number) => {
+    const days = [];
+    const baseDate = new Date();
+    // Adjust to Monday of the offset week
+    const day = baseDate.getDay();
+    const diff = baseDate.getDate() - day + (day === 0 ? -6 : 1) + (weekOffset * 7);
+    const monday = new Date(baseDate.setDate(diff));
+
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(monday);
+      d.setDate(monday.getDate() + i);
+      const label = d.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase();
+      const num = d.getDate();
+      days.push(`${label} ${num}`);
+    }
+    return days;
+  };
+
+  // --- Infinite Scroll Implementation ---
+  useEffect(() => {
+    if (view !== 'cookbook') return;
+
+    const options = { threshold: 0.1 };
+    const handleObserver = (entries: IntersectionObserverEntry[]) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          if (entry.target === topSentinelRef.current) {
+            setWeeks(prev => [Math.min(...prev) - 1, ...prev]);
+          } else if (entry.target === bottomSentinelRef.current) {
+            setWeeks(prev => [...prev, Math.max(...prev) + 1]);
+          }
+        }
+      });
+    };
+
+    const observer = new IntersectionObserver(handleObserver, options);
+    if (topSentinelRef.current) observer.observe(topSentinelRef.current);
+    if (bottomSentinelRef.current) observer.observe(bottomSentinelRef.current);
+
+    return () => observer.disconnect();
+  }, [view]);
+
+  // --- Horizontal Arrow Navigation ---
+  const handleScrollWeek = (week: number, direction: 'left' | 'right') => {
+    const container = horizontalScrollRefs.current[week];
+    if (container) {
+      const scrollAmount = 340 + 32; // Card width + gap
+      container.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth'
+      });
+    }
   };
 
   const handleAddIngredient = (name: string, qty?: number | string, unit?: string) => {
@@ -339,7 +395,6 @@ export default function App() {
                 <p className="text-slate-500 font-bold">Add ingredients to your pantry to get started.</p>
               </div>
 
-              {/* Main Input Component */}
               <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] md:rounded-[3rem] shadow-2xl shadow-slate-200/50 dark:shadow-none p-3 md:p-4 flex flex-col md:flex-row items-center border border-slate-100 dark:border-slate-800 transition-colors focus-within:ring-4 focus-within:ring-primary/10">
                 <div className="flex-[2] flex items-center">
                   <div className="pl-4 md:pl-6 text-slate-300">
@@ -389,14 +444,19 @@ export default function App() {
                 </button>
               </div>
 
-              {/* Quick Add Section */}
               <div className="flex flex-col gap-6">
                 <div className="flex items-center justify-between px-2">
                   <h3 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white">Quick Add Staples</h3>
-                  <button className="text-primary font-black text-sm hover:underline">See All</button>
+                  <button 
+                    type="button"
+                    onClick={() => setShowAllStaples(!showAllStaples)}
+                    className="text-primary font-black text-sm hover:underline cursor-pointer transition-colors"
+                  >
+                    {showAllStaples ? 'Show Less' : 'See All'}
+                  </button>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 md:gap-6">
-                  {COMMON_STAPLES.map((staple) => (
+                  {(showAllStaples ? COMMON_STAPLES : COMMON_STAPLES.slice(0, 4)).map((staple) => (
                     <button key={staple.name} onClick={() => handleAddIngredient(staple.name, 1, 'pcs')} className="bg-white dark:bg-slate-900 rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-8 flex flex-col items-center gap-4 md:gap-6 border border-slate-50 dark:border-slate-800 hover:shadow-2xl hover:shadow-slate-200/50 dark:hover:shadow-primary/5 transition-all group active:scale-95">
                       <div className="size-12 md:size-16 rounded-2xl flex items-center justify-center transition-transform group-hover:rotate-12" style={{ backgroundColor: `${staple.color === 'orange' ? '#ff9800' : staple.color === 'blue' ? '#2196f3' : staple.color === 'red' ? '#f44336' : staple.color === 'yellow' ? '#ffeb3b' : staple.color === 'purple' ? '#9c27b0' : '#9e9e9e'}15` }}>
                         <span className="material-symbols-outlined text-[24px] md:text-[32px]" style={{color: staple.color}}>{staple.icon}</span>
@@ -408,7 +468,6 @@ export default function App() {
               </div>
             </div>
 
-            {/* Pantry List - Responsive Panel */}
             <div className="w-full lg:w-[420px] shrink-0 mb-24 lg:mb-0">
               <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] md:rounded-[3.5rem] shadow-2xl shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-slate-800 flex flex-col h-full min-h-[500px] overflow-hidden transition-colors">
                 <div className="p-8 md:p-10 pb-6 flex items-center justify-between">
@@ -471,10 +530,10 @@ export default function App() {
 
       case 'cookbook':
         return (
-          <div className="flex flex-col flex-1 p-4 md:p-8 lg:p-12 h-full overflow-hidden mb-24 md:mb-0">
-            <div className="flex flex-col gap-10 md:gap-14 h-full">
+          <div className="flex flex-col flex-1 h-screen overflow-y-auto overflow-x-hidden no-scrollbar pb-32">
+            <div className="p-4 md:p-8 lg:p-12 flex flex-col gap-10 md:gap-14">
               {/* Smarter Header with Insights */}
-              <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-8">
+              <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-8 max-w-[1084px] mx-auto w-full">
                 <div>
                   <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary/10 text-primary rounded-full text-[10px] font-black uppercase tracking-widest mb-4 animate-bounce">
                     <span className="material-symbols-outlined text-[14px]">bolt</span>
@@ -502,109 +561,132 @@ export default function App() {
                 </div>
               </div>
 
-              {/* Day Cards Timeline */}
-              <div className="flex-1 overflow-x-auto pb-8 custom-scrollbar scroll-smooth">
-                <div className="flex gap-8 min-w-max h-full">
-                  {Object.keys(mealPlan).map((dayKey) => {
-                    const dayMeals = mealPlan[dayKey];
-                    const totalCals: number = Object.values(dayMeals).reduce((acc: number, m) => {
-                      const meal = m as { calories?: string } | null;
-                      return acc + (meal?.calories ? parseInt(meal.calories) : 0);
-                    }, 0) as number;
-                    
-                    const isToday = dayKey.includes('MON'); // Mocking today highlight
-                    const macroType = totalCals > 1500 ? 'Active Day' : totalCals > 1000 ? 'Balanced' : 'Light';
-                    const suggestion = SAVED_RECIPES_MOCK[Math.floor(Math.random() * SAVED_RECIPES_MOCK.length)];
+              {/* Infinite Content Area */}
+              <div className="flex flex-col gap-16">
+                <div ref={topSentinelRef} className="h-1 opacity-0" />
+                
+                {weeks.sort((a,b) => a - b).map((weekOffset) => {
+                  const weekDays = getDaysForWeek(weekOffset);
+                  return (
+                    <div key={weekOffset} className="relative group max-w-[1084px] mx-auto w-full">
+                      {/* Section Header for the week */}
+                      <div className="flex items-center justify-between mb-8 px-4">
+                        <h2 className="text-xl font-black text-slate-300 dark:text-slate-600 uppercase tracking-widest">
+                          {weekOffset === 0 ? "Current Week" : weekOffset === 1 ? "Next Week" : weekOffset === -1 ? "Last Week" : `Week Offset: ${weekOffset}`}
+                        </h2>
+                      </div>
 
-                    return (
-                      <div key={dayKey} className={`w-[340px] md:w-[440px] flex flex-col h-full bg-white dark:bg-slate-900 p-8 md:p-10 rounded-[4rem] border-2 transition-all ${isToday ? 'border-primary shadow-2xl shadow-primary/5' : 'border-slate-50 dark:border-slate-800 shadow-sm'}`}>
-                        {/* Sticky Header Feel */}
-                        <div className="flex items-start justify-between mb-10 border-b border-slate-50 dark:border-slate-800 pb-6">
-                          <div>
-                            <span className="text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.4em] mb-1 block">{dayKey.split(' ')[0]}</span>
-                            <div className="flex items-center gap-3">
-                              <h3 className="text-4xl font-black text-slate-900 dark:text-white leading-none tracking-tighter">{dayKey.split(' ')[1]}</h3>
-                              {isToday && <span className="bg-primary/20 text-primary text-[9px] px-2 py-0.5 rounded-full font-black uppercase">Today</span>}
-                            </div>
-                          </div>
-                          <div className="flex flex-col items-end gap-3">
-                            <div className="flex gap-2 no-print">
-                              {/* Refined Shuffle Modes */}
-                              <button onClick={() => shuffleDayPlan(dayKey, 'balanced')} className="size-9 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-400 hover:text-primary transition-all" title="Shuffle Balanced">
-                                <span className="material-symbols-outlined text-[18px]">shuffle</span>
-                              </button>
-                              <button onClick={() => shuffleDayPlan(dayKey, 'high-protein')} className="size-9 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-400 hover:text-amber-500 transition-all" title="High Protein Mode">
-                                <span className="material-symbols-outlined text-[18px]">fitness_center</span>
-                              </button>
-                              <button onClick={() => clearDayPlan(dayKey)} className="size-9 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-400 hover:text-red-500 transition-all" title="Reset Day">
-                                <span className="material-symbols-outlined text-[18px]">delete_sweep</span>
-                              </button>
-                            </div>
-                            <div className="text-right">
-                              <span className={`text-[12px] font-black uppercase tracking-widest block ${(totalCals as number) > 0 ? 'text-primary' : 'text-slate-300'}`}>
-                                {totalCals || '0'} kcal
-                              </span>
-                              <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">{macroType}</span>
-                            </div>
-                          </div>
-                        </div>
+                      {/* Navigation Arrows */}
+                      <button 
+                        onClick={() => handleScrollWeek(weekOffset, 'left')}
+                        className="absolute left-[-22px] top-[50%] -translate-y-[50%] size-11 rounded-full bg-slate-900/80 dark:bg-white/80 backdrop-blur-md text-white dark:text-slate-900 flex items-center justify-center z-20 shadow-xl opacity-0 group-hover:opacity-100 transition-all hover:scale-110 active:scale-90"
+                      >
+                        <span className="material-symbols-outlined">chevron_left</span>
+                      </button>
+                      <button 
+                        onClick={() => handleScrollWeek(weekOffset, 'right')}
+                        className="absolute right-[-22px] top-[50%] -translate-y-[50%] size-11 rounded-full bg-slate-900/80 dark:bg-white/80 backdrop-blur-md text-white dark:text-slate-900 flex items-center justify-center z-20 shadow-xl opacity-0 group-hover:opacity-100 transition-all hover:scale-110 active:scale-90"
+                      >
+                        <span className="material-symbols-outlined">chevron_right</span>
+                      </button>
 
-                        {/* Slots */}
-                        <div className="flex-1 flex flex-col gap-6">
-                          {(['Breakfast', 'Lunch', 'Dinner'] as MealSlot[]).map((slot) => {
-                            const meal = dayMeals[slot];
-                            return (
-                              <div key={slot} className="flex-1 flex flex-col group/slot">
-                                <span className="text-[10px] font-black text-slate-300 dark:text-slate-600 uppercase tracking-[0.2em] mb-2 px-1">{slot}</span>
-                                {meal ? (
-                                  <div className="flex-1 bg-slate-50 dark:bg-slate-800/50 rounded-[2.5rem] p-6 relative overflow-hidden flex items-center gap-5 group hover:shadow-xl hover:bg-white dark:hover:bg-slate-800 border border-transparent hover:border-primary/20 transition-all active:scale-[0.98]">
-                                    {meal.image && (
-                                      <RecipeImage src={meal.image} alt={meal.title} className="size-16 md:size-20 rounded-2xl shrink-0" />
-                                    )}
-                                    <div className="flex-1">
-                                      <h4 className="font-black text-slate-900 dark:text-white text-base md:text-lg leading-tight mb-2 pr-6 line-clamp-1">{meal.title}</h4>
-                                      <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 bg-white dark:bg-slate-900 px-3 py-1 rounded-full border border-slate-100 dark:border-slate-800 uppercase tracking-widest">{meal.calories}</span>
-                                    </div>
-                                    <button 
-                                      onClick={() => setMealPlan(prev => ({ ...prev, [dayKey]: { ...prev[dayKey], [slot]: null } }))}
-                                      className="absolute top-4 right-4 text-slate-300 hover:text-red-500 transition-all opacity-0 group-hover:opacity-100 p-1 no-print"
-                                    >
-                                      <span className="material-symbols-outlined text-[18px]">close</span>
+                      {/* Horizontal Planner Row */}
+                      <div 
+                        ref={el => horizontalScrollRefs.current[weekOffset] = el}
+                        className="flex-1 overflow-x-auto overflow-y-hidden no-scrollbar scroll-smooth snap-x snap-mandatory flex gap-8 px-4 min-h-[750px] md:min-h-[1050px]"
+                      >
+                        {weekDays.map((dayKey) => {
+                          const dayMeals = mealPlan[dayKey] || { Breakfast: null, Lunch: null, Dinner: null };
+                          const totalCals: number = Object.values(dayMeals).reduce((acc: number, m) => {
+                            const meal = m as { calories?: string } | null;
+                            return acc + (meal?.calories ? parseInt(meal.calories) : 0);
+                          }, 0) as number;
+                          
+                          const isToday = dayKey.includes(new Date().toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase()) && weekOffset === 0;
+                          const macroType = totalCals > 1500 ? 'Active Day' : totalCals > 1000 ? 'Balanced' : 'Light';
+
+                          return (
+                            <div key={dayKey} className={`w-[340px] shrink-0 snap-start flex flex-col h-full bg-white dark:bg-slate-900 p-8 md:p-12 rounded-[4rem] md:rounded-[5rem] border-2 transition-all ${isToday ? 'border-primary shadow-2xl shadow-primary/5' : 'border-slate-50 dark:border-slate-800 shadow-sm'}`}>
+                              {/* Day Card Header */}
+                              <div className="flex items-start justify-between mb-12 border-b border-slate-50 dark:border-slate-800 pb-8">
+                                <div>
+                                  <span className="text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.4em] mb-1 block">{dayKey.split(' ')[0]}</span>
+                                  <div className="flex items-center gap-3">
+                                    <h3 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white leading-none tracking-tighter">{dayKey.split(' ')[1]}</h3>
+                                    {isToday && <span className="bg-primary/20 text-primary text-[9px] px-2 py-0.5 rounded-full font-black uppercase">Today</span>}
+                                  </div>
+                                </div>
+                                <div className="flex flex-col items-end gap-3">
+                                  <div className="flex gap-2 no-print">
+                                    <button onClick={() => shuffleDayPlan(dayKey, 'balanced')} className="size-9 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-400 hover:text-primary transition-all" title="Shuffle Balanced">
+                                      <span className="material-symbols-outlined text-[18px]">shuffle</span>
+                                    </button>
+                                    <button onClick={() => clearDayPlan(dayKey)} className="size-9 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-400 hover:text-red-500 transition-all" title="Reset Day">
+                                      <span className="material-symbols-outlined text-[18px]">delete_sweep</span>
                                     </button>
                                   </div>
-                                ) : (
-                                  <button 
-                                    onClick={() => addMealToPlan(dayKey, slot)}
-                                    className="flex-1 border-2 border-dashed border-slate-100 dark:border-slate-800 rounded-[2.5rem] flex flex-col items-center justify-center gap-2 group hover:border-primary/40 hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-all active:scale-[0.98] py-8 relative no-print overflow-hidden"
-                                  >
-                                    <div className="flex items-center gap-3">
-                                       <span className="material-symbols-outlined text-[20px] text-slate-200 group-hover:text-primary transition-colors">add_circle</span>
-                                       <span className="text-[11px] font-black text-slate-300 group-hover:text-primary transition-colors uppercase tracking-widest">Add Meal</span>
-                                    </div>
-                                    <div className="absolute inset-x-0 bottom-4 text-center opacity-0 group-hover:opacity-20 transition-all transform group-hover:translate-y-[-4px]">
-                                      <span className="text-[9px] font-bold text-slate-900 dark:text-white">Suggested: {suggestion.title}</span>
-                                    </div>
-                                  </button>
-                                )}
+                                  <div className="text-right">
+                                    <span className={`text-[12px] font-black uppercase tracking-widest block ${(totalCals as number) > 0 ? 'text-primary' : 'text-slate-300'}`}>
+                                      {totalCals || '0'} kcal
+                                    </span>
+                                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">{macroType}</span>
+                                  </div>
+                                </div>
                               </div>
-                            );
-                          })}
-                          <div className="mt-4 pt-6 border-t border-slate-50 dark:border-slate-800 opacity-20 pointer-events-none no-print">
-                             <div className="flex items-center gap-3 px-2">
-                                <span className="material-symbols-outlined text-[16px]">coffee</span>
-                                <span className="text-[10px] font-black uppercase tracking-widest">Snacks & Drinks</span>
-                                <span className="ml-auto text-[8px] bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full">Coming Soon</span>
-                             </div>
-                          </div>
-                        </div>
+
+                              {/* Slots */}
+                              <div className="flex-1 flex flex-col gap-8">
+                                {(['Breakfast', 'Lunch', 'Dinner'] as MealSlot[]).map((slot) => {
+                                  const meal = dayMeals[slot];
+                                  return (
+                                    <div key={slot} className="flex-1 flex flex-col group/slot">
+                                      <span className="text-[10px] font-black text-slate-300 dark:text-slate-600 uppercase tracking-[0.2em] mb-3 px-1">{slot}</span>
+                                      {meal ? (
+                                        <div className="flex-1 bg-slate-50 dark:bg-slate-800/50 rounded-[2.5rem] p-7 md:p-8 relative overflow-hidden flex items-center gap-6 group hover:shadow-xl hover:bg-white dark:hover:bg-slate-800 border border-transparent hover:border-primary/20 transition-all active:scale-[0.98]">
+                                          {meal.image && (
+                                            <RecipeImage src={meal.image} alt={meal.title} className="size-16 md:size-24 rounded-2xl shrink-0" />
+                                          )}
+                                          <div className="flex-1">
+                                            <h4 className="font-black text-slate-900 dark:text-white text-base md:text-xl leading-tight mb-2 pr-6 line-clamp-1">{meal.title}</h4>
+                                            <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 bg-white dark:bg-slate-900 px-3 py-1 rounded-full border border-slate-100 dark:border-slate-800 uppercase tracking-widest">{meal.calories}</span>
+                                          </div>
+                                          <button 
+                                            onClick={() => setMealPlan(prev => ({ ...prev, [dayKey]: { ...prev[dayKey], [slot]: null } }))}
+                                            className="absolute top-5 right-5 text-slate-300 hover:text-red-500 transition-all opacity-0 group-hover:opacity-100 p-1 no-print"
+                                          >
+                                            <span className="material-symbols-outlined text-[18px]">close</span>
+                                          </button>
+                                        </div>
+                                      ) : (
+                                        <button 
+                                          onClick={() => addMealToPlan(dayKey, slot)}
+                                          className="flex-1 border-2 border-dashed border-slate-100 dark:border-slate-800 rounded-[2.5rem] flex flex-col items-center justify-center gap-3 group hover:border-primary/40 hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-all active:scale-[0.98] py-10 relative no-print overflow-hidden"
+                                        >
+                                          <div className="flex items-center gap-3">
+                                             <span className="material-symbols-outlined text-[24px] text-slate-200 group-hover:text-primary transition-colors">add_circle</span>
+                                             <span className="text-[12px] font-black text-slate-300 group-hover:text-primary transition-colors uppercase tracking-widest">Add {slot}</span>
+                                          </div>
+                                        </button>
+                                      )}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
-                    );
-                  })}
+                    </div>
+                  );
+                })}
+
+                <div ref={bottomSentinelRef} className="h-20 flex items-center justify-center opacity-30 italic font-black text-slate-400">
+                  Crafting the future...
                 </div>
               </div>
 
-              {/* Weekly Insight Summary - Reduced Breadth */}
-              <div className="max-w-5xl mx-auto w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-[2.5rem] p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-8 shadow-2xl transition-all">
+              {/* Weekly Insight Summary - Anchored below current view */}
+              <div className="max-w-[1084px] mx-auto w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-[2.5rem] p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-8 shadow-2xl transition-all">
                  <div className="flex flex-col gap-3">
                     <h3 className="text-2xl md:text-4xl font-black tracking-tighter leading-none">Balanced Week Ahead</h3>
                     <p className="text-slate-400 dark:text-slate-500 font-bold text-sm md:text-lg max-w-lg">Your current plan maintains a healthy balance between complex carbs and proteins. Your pantry is 85% ready.</p>
@@ -912,13 +994,12 @@ export default function App() {
           isDarkMode={isDarkMode} 
           toggleDarkMode={toggleDarkMode} 
         />
-        <main className="flex-1 flex flex-col overflow-y-auto overflow-x-hidden custom-scrollbar">
+        <main className="flex-1 flex flex-col overflow-y-auto overflow-x-hidden no-scrollbar">
           {renderContent()}
         </main>
         <BottomNav currentView={view} onNavigate={setView} />
       </div>
       
-      {/* Refined Generator Loading Screen */}
       {isGenerating && (
         <div className="fixed inset-0 z-[200] bg-slate-900/60 backdrop-blur-2xl flex items-center justify-center animate-in fade-in zoom-in duration-500 p-6">
           <div className="bg-white dark:bg-slate-900 p-12 md:p-24 rounded-[4rem] md:rounded-[6rem] shadow-[0_0_100px_rgba(19,236,55,0.15)] flex flex-col items-center gap-10 md:gap-16 text-center max-w-lg border border-white/20">

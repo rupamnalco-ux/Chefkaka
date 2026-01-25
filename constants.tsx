@@ -1,3 +1,4 @@
+
 import React from 'react';
 
 export const INITIAL_PREFERENCES = {
@@ -10,7 +11,7 @@ export const INITIAL_PREFERENCES = {
 export const COMMON_STAPLES = [
   { name: 'Eggs', icon: 'egg', color: 'orange' },
   { name: 'Milk', icon: 'water_full', color: 'blue' },
-  { name: 'Chicken', icon: 'set_meal', color: 'red' },
+  { name: 'Chicken', icon: 'kebab_dining', color: 'red' },
   { name: 'Rice', icon: 'rice_bowl', color: 'yellow' },
   { name: 'Tomatoes', icon: 'nutrition', color: 'red' },
   { name: 'Onion', icon: 'radio_button_checked', color: 'purple' },
