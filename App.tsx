@@ -319,27 +319,31 @@ const Landing: React.FC<{
       <footer className="px-6 md:px-12 py-12 md:py-20 border-t border-slate-100 dark:border-slate-900 bg-white dark:bg-slate-950">
         <div className="max-w-7xl mx-auto w-full flex flex-col items-center">
           <div className="flex items-center gap-3 mb-10 group cursor-pointer" onClick={() => onNavigate('landing')}>
-            <div className="size-8 flex items-center justify-center bg-primary rounded-xl">
-              <span className="material-symbols-outlined !text-[18px] text-white font-black">nutrition</span>
+            <div className="size-10 flex items-center justify-center bg-primary rounded-full shadow-lg shadow-primary/20">
+              <span className="material-symbols-outlined !text-[24px] text-white font-black">eco</span>
             </div>
-            <h2 className="text-xl font-black text-slate-900 dark:text-white">ChefMistri</h2>
+            <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">ChefMistri</h2>
           </div>
 
           <div className="flex flex-wrap justify-center gap-8 md:gap-12 mb-12">
             {['About Us', 'Contact', 'Privacy Policy', 'Terms of Service'].map(link => (
-              <button key={link} className="text-sm font-bold text-slate-500 hover:text-primary transition-colors">{link}</button>
+              <button key={link} className="text-sm font-black text-slate-500 dark:text-slate-400 hover:text-primary transition-colors uppercase tracking-tight">{link}</button>
             ))}
           </div>
 
           <div className="flex gap-6 mb-12">
-            {['camera', 'alternate_email', 'link'].map(icon => (
-              <button key={icon} className="size-11 rounded-full bg-slate-100 dark:bg-slate-900 text-slate-500 hover:bg-primary hover:text-white transition-all flex items-center justify-center active:scale-90">
-                <span className="material-symbols-outlined text-[20px]">{icon}</span>
-              </button>
-            ))}
+            <a href="https://x.com" target="_blank" rel="noopener noreferrer" className="size-12 rounded-full bg-slate-50 dark:bg-slate-900 hover:scale-110 transition-all flex items-center justify-center active:scale-90 border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden p-2">
+              <img src="https://pngimg.com/uploads/x_logo/x_logo_PNG19.png" alt="X" className="w-full h-full object-contain" />
+            </a>
+            <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="size-12 rounded-full bg-slate-50 dark:bg-slate-900 hover:scale-110 transition-all flex items-center justify-center active:scale-90 border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden p-2">
+              <img src="https://pngimg.com/uploads/youtube/youtube_PNG15.png" alt="YouTube" className="w-full h-full object-contain" />
+            </a>
+            <a href="https://meta.com" target="_blank" rel="noopener noreferrer" className="size-12 rounded-full bg-slate-50 dark:bg-slate-900 hover:scale-110 transition-all flex items-center justify-center active:scale-90 border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden p-2">
+              <img src="https://www.citypng.com/public/uploads/preview/facebook-meta-logo-icon-hd-png-701751694777703xqxtpvbu9q.png" alt="Meta" className="w-full h-full object-contain" />
+            </a>
           </div>
 
-          <p className="text-slate-400 text-xs font-bold">© {new Date().getFullYear()} ChefMistri Inc. All rights reserved.</p>
+          <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">© {new Date().getFullYear()} ChefMistri Inc. All rights reserved.</p>
         </div>
       </footer>
     </div>
