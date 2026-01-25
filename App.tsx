@@ -425,13 +425,21 @@ export default function App() {
                   <div className="h-8 w-px bg-slate-100 dark:bg-slate-800 hidden md:block" />
 
                   <div className="relative">
-                    <select 
-                      className="border-none focus:ring-0 bg-transparent text-sm md:text-base font-black text-slate-600 dark:text-slate-300 appearance-none cursor-pointer uppercase tracking-widest p-0 pr-2"
-                      value={inputUnit}
-                      onChange={(e) => setInputUnit(e.target.value)}
-                    >
-                      {UNIT_OPTIONS.map(unit => <option key={unit} value={unit}>{unit}</option>)}
-                    </select>
+                    <div className="h-9 px-3 flex items-center gap-1 rounded-xl bg-slate-50/50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 group/unit transition-all hover:border-primary/20">
+                      <select 
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                        value={inputUnit}
+                        onChange={(e) => setInputUnit(e.target.value)}
+                      >
+                        {UNIT_OPTIONS.map(unit => <option key={unit} value={unit}>{unit}</option>)}
+                      </select>
+                      <div className="flex items-center gap-1 pointer-events-none">
+                        <span className="text-sm md:text-base font-black text-slate-600 dark:text-slate-300 uppercase tracking-widest leading-[1.25]">
+                          {inputUnit}
+                        </span>
+                        <span className="material-symbols-outlined !text-[18px] text-slate-400 group-hover/unit:text-primary transition-colors translate-y-[1px]">expand_more</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
