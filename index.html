@@ -78,6 +78,43 @@
         scrollbar-width: none;
       }
 
+      /* Dark Mode Button Glow - Additive Enhancement */
+      .dark button {
+        position: relative;
+        transition: box-shadow 0.25s ease, transform 0.15s ease;
+      }
+
+      .dark button:not(:disabled) {
+        /* Subtle Idle Glow using the primary green #13ec37 */
+        box-shadow: 0 0 12px rgba(19, 236, 55, 0.12);
+      }
+
+      .dark button:not(:disabled):hover {
+        /* Intense Hover Glow */
+        box-shadow: 
+          0 0 18px rgba(19, 236, 55, 0.35),
+          0 0 36px rgba(19, 236, 55, 0.25);
+        transform: translateY(-1px);
+      }
+
+      .dark button:not(:disabled):active {
+        /* Active Press State */
+        transform: translateY(0);
+        box-shadow: 0 0 10px rgba(19, 236, 55, 0.25);
+      }
+
+      .dark button:focus-visible {
+        /* Focus state for accessibility */
+        outline: none;
+        box-shadow: 
+          0 0 0 2px rgba(19, 236, 55, 0.6),
+          0 0 24px rgba(19, 236, 55, 0.4);
+      }
+
+      .dark button:disabled {
+        box-shadow: none !important;
+      }
+
       @media print {
         @page { margin: 1.5cm; size: auto; }
         body { background: white !important; color: black !important; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
