@@ -59,6 +59,16 @@
       
       body { margin: 0; padding: 0; }
 
+      /* Remove spin buttons from number inputs */
+      input::-webkit-outer-spin-button,
+      input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+      input[type=number] {
+        -moz-appearance: textfield;
+      }
+
       @media print {
         @page { margin: 1.5cm; size: auto; }
         body { background: white !important; color: black !important; print-color-adjust: exact; -webkit-print-color-adjust: exact; }

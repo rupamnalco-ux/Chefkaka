@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
   ViewState, 
@@ -183,7 +184,7 @@ export default function App() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [inputValue, setInputValue] = useState('');
-  const [inputQuantity, setInputQuantity] = useState<number>(1);
+  const [inputQuantity, setInputQuantity] = useState<string>('1');
   const [inputUnit, setInputUnit] = useState<string>('pcs');
   const [searchQuery, setSearchQuery] = useState('');
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -234,24 +235,44 @@ export default function App() {
     }));
   };
 
-  const handleAddIngredient = (name: string, qty?: number, unit?: string) => {
+  const clearDayPlan = (day: string) => {
+    setMealPlan(prev => ({
+      ...prev,
+      [day]: { Breakfast: null, Lunch: null, Dinner: null }
+    }));
+  };
+
+  const shuffleDayPlan = (day: string) => {
+    setMealPlan(prev => ({
+      ...prev,
+      [day]: {
+        Breakfast: { title: SAVED_RECIPES_MOCK[Math.floor(Math.random() * SAVED_RECIPES_MOCK.length)].title, calories: '350 kcal' },
+        Lunch: { title: SAVED_RECIPES_MOCK[Math.floor(Math.random() * SAVED_RECIPES_MOCK.length)].title, calories: '520 kcal' },
+        Dinner: { title: SAVED_RECIPES_MOCK[Math.floor(Math.random() * SAVED_RECIPES_MOCK.length)].title, calories: '480 kcal' }
+      }
+    }));
+  };
+
+  const handleAddIngredient = (name: string, qty?: number | string, unit?: string) => {
     const finalName = name.trim();
     if (!finalName) return;
     
     const exists = pantry.find(p => p.name.toLowerCase() === finalName.toLowerCase());
     if (exists) return;
     
+    const quantityValue = Number(qty ?? inputQuantity) || 1;
+    
     const newItem: Ingredient = { 
       id: Date.now().toString(), 
       name: finalName, 
-      quantity: qty ?? inputQuantity, 
+      quantity: quantityValue, 
       unit: unit ?? inputUnit, 
       category: 'Pantry' 
     };
     
     setPantry(prev => [...prev, newItem]);
     setInputValue('');
-    setInputQuantity(1);
+    setInputQuantity('1');
     setInputUnit('pcs');
   };
 
@@ -310,7 +331,7 @@ export default function App() {
 
               {/* Main Input Component */}
               <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] md:rounded-[3rem] shadow-2xl shadow-slate-200/50 dark:shadow-none p-3 md:p-4 flex flex-col md:flex-row items-center border border-slate-100 dark:border-slate-800 transition-colors focus-within:ring-4 focus-within:ring-primary/10">
-                <div className="flex w-full items-center">
+                <div className="flex-[2] flex items-center">
                   <div className="pl-4 md:pl-6 text-slate-300">
                     <span className="material-symbols-outlined !text-[24px]">add_circle</span>
                   </div>
@@ -325,35 +346,33 @@ export default function App() {
                 
                 <div className="hidden md:block h-10 w-px bg-slate-100 dark:bg-slate-800 mx-4" />
 
-                <div className="flex w-full md:w-auto items-center justify-between md:justify-start px-4 py-4 md:py-0 border-t md:border-t-0 border-slate-50 dark:border-slate-800">
+                <div className="flex w-full md:w-auto items-center justify-between md:justify-start px-4 py-4 md:py-0 border-t md:border-t-0 border-slate-50 dark:border-slate-800 gap-4 md:gap-8">
                   <div className="flex items-center gap-3">
-                    <span className="text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Quantity</span>
+                    <span className="text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest shrink-0">Quantity</span>
                     <input 
                       type="number"
-                      min="1"
-                      className="w-14 md:w-20 border-none focus:ring-0 text-lg md:text-xl font-black text-primary bg-transparent text-center p-0"
+                      className="w-12 md:w-16 border-none focus:ring-0 text-lg md:text-xl font-black text-primary bg-transparent text-center p-0"
                       value={inputQuantity}
-                      onChange={(e) => setInputQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+                      onChange={(e) => setInputQuantity(e.target.value)}
                     />
                   </div>
 
-                  <div className="h-8 w-px bg-slate-100 dark:bg-slate-800 mx-6" />
+                  <div className="h-8 w-px bg-slate-100 dark:bg-slate-800 hidden md:block" />
 
                   <div className="relative">
                     <select 
-                      className="border-none focus:ring-0 bg-transparent text-sm md:text-base font-black text-slate-600 dark:text-slate-300 appearance-none pr-8 cursor-pointer uppercase tracking-widest"
+                      className="border-none focus:ring-0 bg-transparent text-sm md:text-base font-black text-slate-600 dark:text-slate-300 appearance-none cursor-pointer uppercase tracking-widest p-0 pr-2"
                       value={inputUnit}
                       onChange={(e) => setInputUnit(e.target.value)}
                     >
                       {UNIT_OPTIONS.map(unit => <option key={unit} value={unit}>{unit}</option>)}
                     </select>
-                    <span className="material-symbols-outlined absolute right-1 top-1/2 -translate-y-1/2 pointer-events-none text-slate-300 text-lg">unfold_more</span>
                   </div>
                 </div>
 
                 <button 
                   onClick={() => handleAddIngredient(inputValue)} 
-                  className="w-full md:w-auto bg-primary text-white font-black px-8 md:px-14 py-4 md:py-6 rounded-[1.8rem] md:rounded-[2rem] flex items-center justify-center gap-3 hover:bg-primary-hover transition-all active:scale-95 shadow-xl shadow-primary/30 shrink-0"
+                  className="w-full md:w-auto bg-primary text-white font-black px-8 md:px-14 py-4 md:py-6 rounded-[1.8rem] md:rounded-[2rem] flex items-center justify-center gap-3 hover:bg-primary-hover transition-all active:scale-95 shadow-xl shadow-primary/30 shrink-0 md:ml-4"
                 >
                   <span className="material-symbols-outlined text-[20px] md:text-[24px]">auto_awesome</span>
                   <span className="text-base md:text-lg">Add to Pantry</span>
@@ -443,67 +462,148 @@ export default function App() {
       case 'cookbook':
         return (
           <div className="flex flex-col flex-1 p-4 md:p-8 lg:p-12 h-full overflow-hidden mb-24 md:mb-0">
-            <div className="flex flex-col gap-8 md:gap-12 h-full">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+            <div className="flex flex-col gap-10 md:gap-14 h-full">
+              {/* Refined Header */}
+              <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-8">
                 <div>
-                  <h1 className="text-3xl md:text-5xl font-black text-slate-900 dark:text-white mb-2 tracking-tight">Weekly Planner</h1>
-                  <p className="text-slate-400 font-bold text-base md:text-lg">Design your perfect culinary week.</p>
+                  <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary/10 text-primary rounded-full text-[10px] font-black uppercase tracking-widest mb-4">
+                    <span className="material-symbols-outlined text-[14px]">calendar_month</span>
+                    Smart Scheduler
+                  </div>
+                  <h1 className="text-4xl md:text-6xl font-black text-slate-900 dark:text-white mb-3 tracking-tighter leading-none">Weekly Planner</h1>
+                  <p className="text-slate-500 dark:text-slate-400 font-bold text-base md:text-xl max-w-2xl">Effortlessly organize your culinary journey with AI-curated daily nutritional breakdowns.</p>
                 </div>
                 
-                <button 
-                  onClick={() => setView('shopping-list')}
-                  className="w-full sm:w-auto px-8 py-4 bg-primary text-white rounded-full font-black text-base shadow-2xl shadow-primary/20 hover:bg-primary-hover transition-all active:scale-95 flex items-center justify-center gap-3"
-                >
-                  <span className="material-symbols-outlined text-[24px] font-black">checklist</span>
-                  Generate Groceries
-                </button>
+                <div className="flex flex-wrap gap-4">
+                  <button 
+                    onClick={() => setView('recommendations')}
+                    className="flex-1 sm:flex-none px-8 py-4 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-[1.5rem] font-black text-sm flex items-center justify-center gap-3 hover:bg-slate-50 transition-all active:scale-95"
+                  >
+                    <span className="material-symbols-outlined text-[20px]">explore</span>
+                    Browse Feed
+                  </button>
+                  <button 
+                    onClick={() => setView('shopping-list')}
+                    className="flex-1 sm:flex-none px-10 py-5 bg-primary text-white rounded-[1.5rem] font-black text-base shadow-2xl shadow-primary/25 hover:bg-primary-hover transition-all active:scale-95 flex items-center justify-center gap-4"
+                  >
+                    <span className="material-symbols-outlined text-[24px]">shopping_cart_checkout</span>
+                    Generate Groceries
+                  </button>
+                </div>
               </div>
 
-              <div className="flex-1 overflow-x-auto pb-6 snap-x snap-mandatory no-scrollbar">
-                <div className="flex gap-6 md:gap-10 min-w-max h-full pb-6">
-                  {Object.keys(mealPlan).map((dayKey) => (
-                    <div key={dayKey} className="w-[280px] md:w-[380px] flex flex-col gap-6 md:gap-8 snap-center">
-                      <div className="flex flex-col items-center gap-2 mb-2">
-                        <span className="text-[11px] md:text-[13px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.3em]">{dayKey.split(' ')[0]}</span>
-                        <div className="flex items-center gap-3">
-                           <span className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white">{dayKey.split(' ')[1]}</span>
-                           <span className="w-2 h-2 bg-primary rounded-full mt-2"></span>
-                        </div>
-                      </div>
-                      
-                      {(['Breakfast', 'Lunch', 'Dinner'] as MealSlot[]).map((slot) => {
-                        const meal = mealPlan[dayKey][slot];
-                        return (
-                          <div key={slot} className="flex flex-col gap-3 flex-1 min-h-[160px] md:min-h-[200px]">
-                            <span className="text-[10px] md:text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.15em] px-2">{slot}</span>
-                            {meal ? (
-                              <div className="flex-1 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-[2.5rem] md:rounded-[3rem] p-8 md:p-10 shadow-sm hover:shadow-2xl hover:border-primary/20 transition-all group relative overflow-hidden flex flex-col justify-center active:scale-[0.98]">
-                                <h4 className="font-black text-slate-900 dark:text-white text-lg md:text-xl leading-tight mb-3 pr-6">{meal.title}</h4>
-                                <div className="inline-flex px-4 py-1.5 bg-primary/10 text-primary text-[10px] md:text-[11px] font-black rounded-full w-fit uppercase tracking-widest">
-                                  {meal.calories || '450 kcal'}
-                                </div>
-                                <button 
-                                  onClick={() => setMealPlan(prev => ({ ...prev, [dayKey]: { ...prev[dayKey], [slot]: null } }))}
-                                  className="absolute top-6 md:top-8 right-6 md:right-8 text-slate-200 hover:text-red-400 transition-colors p-2 rounded-xl hover:bg-red-50"
-                                >
-                                  <span className="material-symbols-outlined text-[18px] md:text-[22px]">close</span>
-                                </button>
-                              </div>
-                            ) : (
-                              <button 
-                                onClick={() => addMealToPlan(dayKey, slot)}
-                                className="flex-1 bg-slate-50/20 dark:bg-slate-800/10 border-2 border-dashed border-slate-100 dark:border-slate-800 rounded-[2.5rem] md:rounded-[3rem] flex items-center justify-center group hover:bg-white dark:hover:bg-slate-800 hover:border-primary/30 transition-all active:scale-[0.98]"
-                              >
-                                <div className="size-12 md:size-16 rounded-3xl bg-white dark:bg-slate-700 flex items-center justify-center shadow-md text-slate-300 group-hover:text-primary transition-all group-hover:rotate-90">
-                                  <span className="material-symbols-outlined text-[24px] md:text-[32px]">add</span>
-                                </div>
+              {/* Day Cards Grid */}
+              <div className="flex-1 overflow-x-auto pb-8 custom-scrollbar scroll-smooth">
+                <div className="flex gap-8 min-w-max h-full">
+                  {Object.keys(mealPlan).map((dayKey) => {
+                    const dayMeals = mealPlan[dayKey];
+                    // FIX: Explicitly typed the accumulator as number and cast 'm' to resolve 'unknown' type inference errors.
+                    const totalCals = Object.values(dayMeals).reduce((acc: number, m) => {
+                      const meal = m as { title: string; calories?: string } | null;
+                      return acc + (meal?.calories ? parseInt(meal.calories) : 0);
+                    }, 0);
+                    
+                    return (
+                      <div key={dayKey} className="w-[320px] md:w-[420px] flex flex-col h-full bg-white/40 dark:bg-slate-900/40 p-6 md:p-8 rounded-[3.5rem] md:rounded-[4.5rem] border border-slate-100 dark:border-slate-800/50 backdrop-blur-sm">
+                        {/* Day Title & Summary */}
+                        <div className="flex items-start justify-between mb-8">
+                          <div className="flex flex-col">
+                            <span className="text-[11px] font-black text-slate-400 uppercase tracking-[0.3em] mb-1">{dayKey.split(' ')[0]}</span>
+                            <div className="flex items-center gap-3">
+                              <h3 className="text-4xl font-black text-slate-900 dark:text-white leading-none">{dayKey.split(' ')[1]}</h3>
+                              {totalCals > 0 && (
+                                <div className="size-2 bg-primary rounded-full animate-pulse shadow-[0_0_10px_rgba(19,236,55,0.5)]"></div>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex flex-col items-end">
+                            <div className="flex gap-2">
+                              <button onClick={() => shuffleDayPlan(dayKey)} className="size-10 rounded-2xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 flex items-center justify-center text-slate-400 hover:text-primary hover:border-primary/20 transition-all active:scale-90" title="Shuffle Day">
+                                <span className="material-symbols-outlined text-[20px]">shuffle</span>
                               </button>
+                              <button onClick={() => clearDayPlan(dayKey)} className="size-10 rounded-2xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 flex items-center justify-center text-slate-400 hover:text-red-500 hover:border-red-100 transition-all active:scale-90" title="Clear Day">
+                                <span className="material-symbols-outlined text-[20px]">delete_sweep</span>
+                              </button>
+                            </div>
+                            {totalCals > 0 && (
+                              <span className="text-[10px] font-black text-primary uppercase mt-3 tracking-widest bg-primary/5 px-2 py-0.5 rounded-full">{totalCals} kcal total</span>
                             )}
                           </div>
-                        );
-                      })}
-                    </div>
-                  ))}
+                        </div>
+
+                        {/* Slots Stack */}
+                        <div className="flex-1 flex flex-col gap-5">
+                          {(['Breakfast', 'Lunch', 'Dinner'] as MealSlot[]).map((slot) => {
+                            const meal = dayMeals[slot];
+                            const slotColor = slot === 'Breakfast' ? 'bg-amber-400' : slot === 'Lunch' ? 'bg-sky-400' : 'bg-indigo-400';
+                            
+                            return (
+                              <div key={slot} className="flex-1 flex flex-col group/slot">
+                                <div className="flex items-center gap-3 mb-2 px-2">
+                                  <div className={`size-1.5 rounded-full ${slotColor}`}></div>
+                                  <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">{slot}</span>
+                                </div>
+                                
+                                {meal ? (
+                                  <div className="flex-1 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-[2.5rem] md:rounded-[3rem] p-6 md:p-8 shadow-sm group-hover/slot:shadow-2xl group-hover/slot:border-primary/20 transition-all relative overflow-hidden flex flex-col justify-center active:scale-[0.98]">
+                                    <h4 className="font-black text-slate-900 dark:text-white text-base md:text-xl leading-snug mb-3 pr-8">{meal.title}</h4>
+                                    <div className="flex items-center gap-3">
+                                      <div className="inline-flex px-3 py-1 bg-slate-50 dark:bg-slate-900 text-slate-500 dark:text-slate-400 text-[10px] font-black rounded-full uppercase tracking-wider">
+                                        {meal.calories || '450 kcal'}
+                                      </div>
+                                      <span className="material-symbols-outlined text-[14px] text-slate-200">restaurant</span>
+                                    </div>
+                                    <button 
+                                      onClick={() => setMealPlan(prev => ({ ...prev, [dayKey]: { ...prev[dayKey], [slot]: null } }))}
+                                      className="absolute top-6 right-6 text-slate-200 hover:text-red-400 transition-colors p-2 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/10 active:rotate-90"
+                                    >
+                                      <span className="material-symbols-outlined text-[20px]">close</span>
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <button 
+                                    onClick={() => addMealToPlan(dayKey, slot)}
+                                    className="flex-1 bg-slate-100/30 dark:bg-slate-800/20 border-2 border-dashed border-slate-100 dark:border-slate-800 rounded-[2.5rem] md:rounded-[3rem] flex items-center justify-center group hover:bg-white dark:hover:bg-slate-800 hover:border-primary/40 transition-all active:scale-[0.98] py-8"
+                                  >
+                                    <div className="flex flex-col items-center gap-3">
+                                      <div className="size-10 md:size-14 rounded-2xl bg-white dark:bg-slate-700 flex items-center justify-center shadow-md text-slate-200 group-hover:text-primary transition-all group-hover:rotate-90">
+                                        <span className="material-symbols-outlined text-[24px] md:text-[28px] font-black">add</span>
+                                      </div>
+                                      <span className="text-[10px] font-black text-slate-300 dark:text-slate-600 uppercase tracking-widest group-hover:text-primary transition-colors">Assign Meal</span>
+                                    </div>
+                                  </button>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+
+                        {/* Nutritional Progress Bars */}
+                        {totalCals > 0 && (
+                          <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800 grid grid-cols-2 gap-4">
+                            <div className="flex flex-col gap-1.5">
+                              <div className="flex justify-between text-[9px] font-black text-slate-400 uppercase tracking-tighter">
+                                <span>Macros</span>
+                                <span>65%</span>
+                              </div>
+                              <div className="w-full h-1 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                                <div className="h-full bg-primary" style={{ width: '65%' }}></div>
+                              </div>
+                            </div>
+                            <div className="flex flex-col gap-1.5">
+                              <div className="flex justify-between text-[9px] font-black text-slate-400 uppercase tracking-tighter">
+                                <span>Hydration</span>
+                                <span>80%</span>
+                              </div>
+                              <div className="w-full h-1 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                                <div className="h-full bg-sky-400" style={{ width: '80%' }}></div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </div>
@@ -718,7 +818,7 @@ export default function App() {
                   <div className="flex flex-col gap-6 md:gap-12">
                     {selectedRecipe.ingredients.map((ing, i) => (
                       <div key={i} className="flex justify-between items-center group/ing">
-                        <span className="text-lg md:text-2xl font-black text-slate-900 dark:text-slate-200 group-hover/ing:text-primary transition-colors">{ing.name}</span>
+                        <span className="text-lg md:text-2xl font-black text-slate-900 dark:text-white group-hover/ing:text-primary transition-colors">{ing.name}</span>
                         <div className="flex items-center gap-4">
                            <div className="h-px w-8 md:w-16 bg-slate-200 dark:bg-slate-800 group-hover/ing:w-24 transition-all"></div>
                            <span className="text-primary text-lg md:text-2xl font-black">{ing.amount}</span>
