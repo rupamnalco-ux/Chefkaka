@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
   ViewState, 
@@ -199,11 +198,14 @@ export default function App() {
   ]);
   const [groceryInput, setGroceryInput] = useState('');
 
-  const [mealPlan, setMealPlan] = useState<Record<string, Record<MealSlot, { title: string; calories?: string } | null>>>({
+  const [mealPlan, setMealPlan] = useState<Record<string, Record<MealSlot, { title: string; calories?: string; image?: string } | null>>>({
     'MON 23': { Breakfast: null, Lunch: MOCK_RECIPES[0], Dinner: MOCK_RECIPES[1] },
     'TUE 24': { Breakfast: { title: 'Greek Yogurt Bowl', calories: '320 kcal' }, Lunch: null, Dinner: { title: 'Chicken Stir-fry', calories: '480 kcal' } },
     'WED 25': { Breakfast: null, Lunch: { title: 'Turkey Club Sandwich', calories: '510 kcal' }, Dinner: null },
     'THU 26': { Breakfast: null, Lunch: null, Dinner: null },
+    'FRI 27': { Breakfast: null, Lunch: null, Dinner: null },
+    'SAT 28': { Breakfast: null, Lunch: null, Dinner: null },
+    'SUN 29': { Breakfast: null, Lunch: null, Dinner: null },
   });
 
   const SAVED_RECIPES_MOCK: Recipe[] = useMemo(() => [
@@ -230,7 +232,7 @@ export default function App() {
       ...prev,
       [day]: {
         ...prev[day],
-        [slot]: { title: mealToAdd.title, calories: mealToAdd.calories }
+        [slot]: { title: mealToAdd.title, calories: mealToAdd.calories, image: mealToAdd.image }
       }
     }));
   };
@@ -242,13 +244,21 @@ export default function App() {
     }));
   };
 
-  const shuffleDayPlan = (day: string) => {
+  const shuffleDayPlan = (day: string, mode: 'balanced' | 'high-protein' | 'light' = 'balanced') => {
+    const filtered = mode === 'high-protein' 
+      ? SAVED_RECIPES_MOCK.filter(r => parseInt(r.calories || '0') > 400)
+      : mode === 'light' 
+        ? SAVED_RECIPES_MOCK.filter(r => parseInt(r.calories || '0') < 400)
+        : SAVED_RECIPES_MOCK;
+
+    const source = filtered.length > 0 ? filtered : SAVED_RECIPES_MOCK;
+
     setMealPlan(prev => ({
       ...prev,
       [day]: {
-        Breakfast: { title: SAVED_RECIPES_MOCK[Math.floor(Math.random() * SAVED_RECIPES_MOCK.length)].title, calories: '350 kcal' },
-        Lunch: { title: SAVED_RECIPES_MOCK[Math.floor(Math.random() * SAVED_RECIPES_MOCK.length)].title, calories: '520 kcal' },
-        Dinner: { title: SAVED_RECIPES_MOCK[Math.floor(Math.random() * SAVED_RECIPES_MOCK.length)].title, calories: '480 kcal' }
+        Breakfast: { title: source[Math.floor(Math.random() * source.length)].title, calories: '350 kcal' },
+        Lunch: { title: source[Math.floor(Math.random() * source.length)].title, calories: '520 kcal' },
+        Dinner: { title: source[Math.floor(Math.random() * source.length)].title, calories: '480 kcal' }
       }
     }));
   };
@@ -391,7 +401,7 @@ export default function App() {
                       <div className="size-12 md:size-16 rounded-2xl flex items-center justify-center transition-transform group-hover:rotate-12" style={{ backgroundColor: `${staple.color === 'orange' ? '#ff9800' : staple.color === 'blue' ? '#2196f3' : staple.color === 'red' ? '#f44336' : staple.color === 'yellow' ? '#ffeb3b' : staple.color === 'purple' ? '#9c27b0' : '#9e9e9e'}15` }}>
                         <span className="material-symbols-outlined text-[24px] md:text-[32px]" style={{color: staple.color}}>{staple.icon}</span>
                       </div>
-                      <span className="font-black text-sm md:text-base text-slate-900 dark:text-slate-200">{staple.name}</span>
+                      <span className="font-black text-sm md:text-base text-slate-900 dark:text-white">{staple.name}</span>
                     </button>
                   ))}
                 </div>
@@ -463,18 +473,18 @@ export default function App() {
         return (
           <div className="flex flex-col flex-1 p-4 md:p-8 lg:p-12 h-full overflow-hidden mb-24 md:mb-0">
             <div className="flex flex-col gap-10 md:gap-14 h-full">
-              {/* Refined Header */}
+              {/* Smarter Header with Insights */}
               <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-8">
                 <div>
-                  <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary/10 text-primary rounded-full text-[10px] font-black uppercase tracking-widest mb-4">
-                    <span className="material-symbols-outlined text-[14px]">calendar_month</span>
-                    Smart Scheduler
+                  <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary/10 text-primary rounded-full text-[10px] font-black uppercase tracking-widest mb-4 animate-bounce">
+                    <span className="material-symbols-outlined text-[14px]">bolt</span>
+                    Daily Insight: Plan high protein lunches for active days
                   </div>
-                  <h1 className="text-4xl md:text-6xl font-black text-slate-900 dark:text-white mb-3 tracking-tighter leading-none">Weekly Planner</h1>
-                  <p className="text-slate-500 dark:text-slate-400 font-bold text-base md:text-xl max-w-2xl">Effortlessly organize your culinary journey with AI-curated daily nutritional breakdowns.</p>
+                  <h1 className="text-4xl md:text-6xl font-black text-slate-900 dark:text-white mb-3 tracking-tighter leading-none">Meal Planner</h1>
+                  <p className="text-slate-500 dark:text-slate-400 font-bold text-base md:text-xl max-w-2xl">Visualizing your kitchen workflow. Tap slots to assign or use shuffle modes for quick ideas.</p>
                 </div>
                 
-                <div className="flex flex-wrap gap-4">
+                <div className="flex flex-wrap gap-4 no-print">
                   <button 
                     onClick={() => setView('recommendations')}
                     className="flex-1 sm:flex-none px-8 py-4 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-[1.5rem] font-black text-sm flex items-center justify-center gap-3 hover:bg-slate-50 transition-all active:scale-95"
@@ -487,124 +497,129 @@ export default function App() {
                     className="flex-1 sm:flex-none px-10 py-5 bg-primary text-white rounded-[1.5rem] font-black text-base shadow-2xl shadow-primary/25 hover:bg-primary-hover transition-all active:scale-95 flex items-center justify-center gap-4"
                   >
                     <span className="material-symbols-outlined text-[24px]">shopping_cart_checkout</span>
-                    Generate Groceries
+                    Export Groceries
                   </button>
                 </div>
               </div>
 
-              {/* Day Cards Grid */}
+              {/* Day Cards Timeline */}
               <div className="flex-1 overflow-x-auto pb-8 custom-scrollbar scroll-smooth">
                 <div className="flex gap-8 min-w-max h-full">
                   {Object.keys(mealPlan).map((dayKey) => {
                     const dayMeals = mealPlan[dayKey];
-                    // FIX: Explicitly typed the accumulator as number and cast 'm' to resolve 'unknown' type inference errors.
-                    const totalCals = Object.values(dayMeals).reduce((acc: number, m) => {
-                      const meal = m as { title: string; calories?: string } | null;
+                    const totalCals: number = Object.values(dayMeals).reduce((acc: number, m) => {
+                      const meal = m as { calories?: string } | null;
                       return acc + (meal?.calories ? parseInt(meal.calories) : 0);
-                    }, 0);
+                    }, 0) as number;
                     
+                    const isToday = dayKey.includes('MON'); // Mocking today highlight
+                    const macroType = totalCals > 1500 ? 'Active Day' : totalCals > 1000 ? 'Balanced' : 'Light';
+                    const suggestion = SAVED_RECIPES_MOCK[Math.floor(Math.random() * SAVED_RECIPES_MOCK.length)];
+
                     return (
-                      <div key={dayKey} className="w-[320px] md:w-[420px] flex flex-col h-full bg-white/40 dark:bg-slate-900/40 p-6 md:p-8 rounded-[3.5rem] md:rounded-[4.5rem] border border-slate-100 dark:border-slate-800/50 backdrop-blur-sm">
-                        {/* Day Title & Summary */}
-                        <div className="flex items-start justify-between mb-8">
-                          <div className="flex flex-col">
-                            <span className="text-[11px] font-black text-slate-400 uppercase tracking-[0.3em] mb-1">{dayKey.split(' ')[0]}</span>
+                      <div key={dayKey} className={`w-[340px] md:w-[440px] flex flex-col h-full bg-white dark:bg-slate-900 p-8 md:p-10 rounded-[4rem] border-2 transition-all ${isToday ? 'border-primary shadow-2xl shadow-primary/5' : 'border-slate-50 dark:border-slate-800 shadow-sm'}`}>
+                        {/* Sticky Header Feel */}
+                        <div className="flex items-start justify-between mb-10 border-b border-slate-50 dark:border-slate-800 pb-6">
+                          <div>
+                            <span className="text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.4em] mb-1 block">{dayKey.split(' ')[0]}</span>
                             <div className="flex items-center gap-3">
-                              <h3 className="text-4xl font-black text-slate-900 dark:text-white leading-none">{dayKey.split(' ')[1]}</h3>
-                              {totalCals > 0 && (
-                                <div className="size-2 bg-primary rounded-full animate-pulse shadow-[0_0_10px_rgba(19,236,55,0.5)]"></div>
-                              )}
+                              <h3 className="text-4xl font-black text-slate-900 dark:text-white leading-none tracking-tighter">{dayKey.split(' ')[1]}</h3>
+                              {isToday && <span className="bg-primary/20 text-primary text-[9px] px-2 py-0.5 rounded-full font-black uppercase">Today</span>}
                             </div>
                           </div>
-                          <div className="flex flex-col items-end">
-                            <div className="flex gap-2">
-                              <button onClick={() => shuffleDayPlan(dayKey)} className="size-10 rounded-2xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 flex items-center justify-center text-slate-400 hover:text-primary hover:border-primary/20 transition-all active:scale-90" title="Shuffle Day">
-                                <span className="material-symbols-outlined text-[20px]">shuffle</span>
+                          <div className="flex flex-col items-end gap-3">
+                            <div className="flex gap-2 no-print">
+                              {/* Refined Shuffle Modes */}
+                              <button onClick={() => shuffleDayPlan(dayKey, 'balanced')} className="size-9 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-400 hover:text-primary transition-all" title="Shuffle Balanced">
+                                <span className="material-symbols-outlined text-[18px]">shuffle</span>
                               </button>
-                              <button onClick={() => clearDayPlan(dayKey)} className="size-10 rounded-2xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 flex items-center justify-center text-slate-400 hover:text-red-500 hover:border-red-100 transition-all active:scale-90" title="Clear Day">
-                                <span className="material-symbols-outlined text-[20px]">delete_sweep</span>
+                              <button onClick={() => shuffleDayPlan(dayKey, 'high-protein')} className="size-9 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-400 hover:text-amber-500 transition-all" title="High Protein Mode">
+                                <span className="material-symbols-outlined text-[18px]">fitness_center</span>
+                              </button>
+                              <button onClick={() => clearDayPlan(dayKey)} className="size-9 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-400 hover:text-red-500 transition-all" title="Reset Day">
+                                <span className="material-symbols-outlined text-[18px]">delete_sweep</span>
                               </button>
                             </div>
-                            {totalCals > 0 && (
-                              <span className="text-[10px] font-black text-primary uppercase mt-3 tracking-widest bg-primary/5 px-2 py-0.5 rounded-full">{totalCals} kcal total</span>
-                            )}
+                            <div className="text-right">
+                              <span className={`text-[12px] font-black uppercase tracking-widest block ${(totalCals as number) > 0 ? 'text-primary' : 'text-slate-300'}`}>
+                                {totalCals || '0'} kcal
+                              </span>
+                              <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">{macroType}</span>
+                            </div>
                           </div>
                         </div>
 
-                        {/* Slots Stack */}
-                        <div className="flex-1 flex flex-col gap-5">
+                        {/* Slots */}
+                        <div className="flex-1 flex flex-col gap-6">
                           {(['Breakfast', 'Lunch', 'Dinner'] as MealSlot[]).map((slot) => {
                             const meal = dayMeals[slot];
-                            const slotColor = slot === 'Breakfast' ? 'bg-amber-400' : slot === 'Lunch' ? 'bg-sky-400' : 'bg-indigo-400';
-                            
                             return (
                               <div key={slot} className="flex-1 flex flex-col group/slot">
-                                <div className="flex items-center gap-3 mb-2 px-2">
-                                  <div className={`size-1.5 rounded-full ${slotColor}`}></div>
-                                  <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">{slot}</span>
-                                </div>
-                                
+                                <span className="text-[10px] font-black text-slate-300 dark:text-slate-600 uppercase tracking-[0.2em] mb-2 px-1">{slot}</span>
                                 {meal ? (
-                                  <div className="flex-1 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-[2.5rem] md:rounded-[3rem] p-6 md:p-8 shadow-sm group-hover/slot:shadow-2xl group-hover/slot:border-primary/20 transition-all relative overflow-hidden flex flex-col justify-center active:scale-[0.98]">
-                                    <h4 className="font-black text-slate-900 dark:text-white text-base md:text-xl leading-snug mb-3 pr-8">{meal.title}</h4>
-                                    <div className="flex items-center gap-3">
-                                      <div className="inline-flex px-3 py-1 bg-slate-50 dark:bg-slate-900 text-slate-500 dark:text-slate-400 text-[10px] font-black rounded-full uppercase tracking-wider">
-                                        {meal.calories || '450 kcal'}
-                                      </div>
-                                      <span className="material-symbols-outlined text-[14px] text-slate-200">restaurant</span>
+                                  <div className="flex-1 bg-slate-50 dark:bg-slate-800/50 rounded-[2.5rem] p-6 relative overflow-hidden flex items-center gap-5 group hover:shadow-xl hover:bg-white dark:hover:bg-slate-800 border border-transparent hover:border-primary/20 transition-all active:scale-[0.98]">
+                                    {meal.image && (
+                                      <RecipeImage src={meal.image} alt={meal.title} className="size-16 md:size-20 rounded-2xl shrink-0" />
+                                    )}
+                                    <div className="flex-1">
+                                      <h4 className="font-black text-slate-900 dark:text-white text-base md:text-lg leading-tight mb-2 pr-6 line-clamp-1">{meal.title}</h4>
+                                      <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 bg-white dark:bg-slate-900 px-3 py-1 rounded-full border border-slate-100 dark:border-slate-800 uppercase tracking-widest">{meal.calories}</span>
                                     </div>
                                     <button 
                                       onClick={() => setMealPlan(prev => ({ ...prev, [dayKey]: { ...prev[dayKey], [slot]: null } }))}
-                                      className="absolute top-6 right-6 text-slate-200 hover:text-red-400 transition-colors p-2 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/10 active:rotate-90"
+                                      className="absolute top-4 right-4 text-slate-300 hover:text-red-500 transition-all opacity-0 group-hover:opacity-100 p-1 no-print"
                                     >
-                                      <span className="material-symbols-outlined text-[20px]">close</span>
+                                      <span className="material-symbols-outlined text-[18px]">close</span>
                                     </button>
                                   </div>
                                 ) : (
                                   <button 
                                     onClick={() => addMealToPlan(dayKey, slot)}
-                                    className="flex-1 bg-slate-100/30 dark:bg-slate-800/20 border-2 border-dashed border-slate-100 dark:border-slate-800 rounded-[2.5rem] md:rounded-[3rem] flex items-center justify-center group hover:bg-white dark:hover:bg-slate-800 hover:border-primary/40 transition-all active:scale-[0.98] py-8"
+                                    className="flex-1 border-2 border-dashed border-slate-100 dark:border-slate-800 rounded-[2.5rem] flex flex-col items-center justify-center gap-2 group hover:border-primary/40 hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-all active:scale-[0.98] py-8 relative no-print overflow-hidden"
                                   >
-                                    <div className="flex flex-col items-center gap-3">
-                                      <div className="size-10 md:size-14 rounded-2xl bg-white dark:bg-slate-700 flex items-center justify-center shadow-md text-slate-200 group-hover:text-primary transition-all group-hover:rotate-90">
-                                        <span className="material-symbols-outlined text-[24px] md:text-[28px] font-black">add</span>
-                                      </div>
-                                      <span className="text-[10px] font-black text-slate-300 dark:text-slate-600 uppercase tracking-widest group-hover:text-primary transition-colors">Assign Meal</span>
+                                    <div className="flex items-center gap-3">
+                                       <span className="material-symbols-outlined text-[20px] text-slate-200 group-hover:text-primary transition-colors">add_circle</span>
+                                       <span className="text-[11px] font-black text-slate-300 group-hover:text-primary transition-colors uppercase tracking-widest">Add Meal</span>
+                                    </div>
+                                    <div className="absolute inset-x-0 bottom-4 text-center opacity-0 group-hover:opacity-20 transition-all transform group-hover:translate-y-[-4px]">
+                                      <span className="text-[9px] font-bold text-slate-900 dark:text-white">Suggested: {suggestion.title}</span>
                                     </div>
                                   </button>
                                 )}
                               </div>
                             );
                           })}
-                        </div>
-
-                        {/* Nutritional Progress Bars */}
-                        {totalCals > 0 && (
-                          <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800 grid grid-cols-2 gap-4">
-                            <div className="flex flex-col gap-1.5">
-                              <div className="flex justify-between text-[9px] font-black text-slate-400 uppercase tracking-tighter">
-                                <span>Macros</span>
-                                <span>65%</span>
-                              </div>
-                              <div className="w-full h-1 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                                <div className="h-full bg-primary" style={{ width: '65%' }}></div>
-                              </div>
-                            </div>
-                            <div className="flex flex-col gap-1.5">
-                              <div className="flex justify-between text-[9px] font-black text-slate-400 uppercase tracking-tighter">
-                                <span>Hydration</span>
-                                <span>80%</span>
-                              </div>
-                              <div className="w-full h-1 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                                <div className="h-full bg-sky-400" style={{ width: '80%' }}></div>
-                              </div>
-                            </div>
+                          <div className="mt-4 pt-6 border-t border-slate-50 dark:border-slate-800 opacity-20 pointer-events-none no-print">
+                             <div className="flex items-center gap-3 px-2">
+                                <span className="material-symbols-outlined text-[16px]">coffee</span>
+                                <span className="text-[10px] font-black uppercase tracking-widest">Snacks & Drinks</span>
+                                <span className="ml-auto text-[8px] bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full">Coming Soon</span>
+                             </div>
                           </div>
-                        )}
+                        </div>
                       </div>
                     );
                   })}
                 </div>
+              </div>
+
+              {/* Weekly Insight Summary - Reduced Breadth */}
+              <div className="max-w-5xl mx-auto w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-[2.5rem] p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-8 shadow-2xl transition-all">
+                 <div className="flex flex-col gap-3">
+                    <h3 className="text-2xl md:text-4xl font-black tracking-tighter leading-none">Balanced Week Ahead</h3>
+                    <p className="text-slate-400 dark:text-slate-500 font-bold text-sm md:text-lg max-w-lg">Your current plan maintains a healthy balance between complex carbs and proteins. Your pantry is 85% ready.</p>
+                 </div>
+                 <div className="flex gap-6 md:gap-10 shrink-0">
+                    <div className="flex flex-col items-center">
+                       <span className="text-primary text-3xl md:text-5xl font-black tracking-tighter">18</span>
+                       <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">Meals Planned</span>
+                    </div>
+                    <div className="h-12 md:h-16 w-px bg-white/10 dark:bg-slate-200"></div>
+                    <div className="flex flex-col items-center">
+                       <span className="text-sky-400 text-3xl md:text-5xl font-black tracking-tighter">92%</span>
+                       <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">Fiber Target</span>
+                    </div>
+                 </div>
               </div>
             </div>
           </div>
