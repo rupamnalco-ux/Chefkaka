@@ -1,3 +1,10 @@
+declare global {
+  namespace NodeJS {
+    interface ProcessEnv {
+      API_KEY: string;
+    }
+  }
+}
 
 export interface Ingredient {
   id: string;
