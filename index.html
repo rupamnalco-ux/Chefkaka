@@ -115,6 +115,61 @@
         box-shadow: none !important;
       }
 
+      /* Specific lower intensity for icon buttons in dark mode */
+      .dark button.icon-button:hover {
+        box-shadow: 0 0 12px rgba(19, 236, 55, 0.25) !important;
+      }
+
+      /* Yellow Glow Button (Landing Page Theme Toggle) */
+      .dark .yellow-glow-button {
+        box-shadow: 
+          0 0 12px rgba(250, 204, 21, 0.35),
+          0 0 28px rgba(250, 204, 21, 0.25) !important;
+        transition: box-shadow 0.25s ease;
+      }
+
+      .dark .yellow-glow-button:hover {
+        box-shadow: 
+          0 0 18px rgba(250, 204, 21, 0.55),
+          0 0 42px rgba(250, 204, 21, 0.35) !important;
+      }
+
+      .dark .yellow-glow-button:focus-visible {
+        outline: none;
+        box-shadow: 
+          0 0 0 2px rgba(250, 204, 21, 0.8),
+          0 0 32px rgba(250, 204, 21, 0.5) !important;
+      }
+
+      /* Section Title and Subtitle Single-Line Rendering */
+      .section-title, .section-subtitle {
+        white-space: nowrap;
+      }
+
+      @media (max-width: 768px) {
+        .section-title, .section-subtitle {
+          white-space: normal;
+        }
+      }
+
+      /* Meal Planner Navigation Alignment Fixes for Dark Mode */
+      .dark .planner-arrow {
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        box-sizing: border-box !important;
+      }
+
+      .dark .planner-arrow.left {
+        left: -16px !important;
+      }
+
+      .dark .planner-arrow.right {
+        right: -16px !important;
+      }
+
       @media print {
         @page { margin: 1.5cm; size: auto; }
         body { background: white !important; color: black !important; print-color-adjust: exact; -webkit-print-color-adjust: exact; }

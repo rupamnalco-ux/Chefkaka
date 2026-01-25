@@ -62,7 +62,7 @@ const RecipeImage: React.FC<{ src: string; alt: string; className?: string }> = 
 
 const Sidebar: React.FC<{ currentView: ViewState; onNavigate: (view: ViewState) => void }> = ({ currentView, onNavigate }) => (
   <aside className="hidden lg:flex w-72 shrink-0 flex-col h-screen sticky top-0 bg-white dark:bg-slate-900 border-r border-slate-100 dark:border-slate-800 p-8 z-40 transition-colors no-print">
-    <div className="flex items-center gap-3 mb-12 px-2 cursor-pointer group" onClick={() => onNavigate('pantry')}>
+    <div className="flex items-center gap-3 mb-12 px-2 cursor-pointer group" onClick={() => onNavigate('landing')}>
       <div className="size-10 flex items-center justify-center bg-primary rounded-2xl group-hover:rotate-6 transition-transform shadow-lg shadow-primary/20">
         <span className="material-symbols-outlined !text-[24px] text-white font-black">nutrition</span>
       </div>
@@ -137,7 +137,7 @@ const Header: React.FC<{
 }> = ({ onNavigate, onSearch, isDarkMode, toggleDarkMode }) => (
   <header className="h-16 md:h-20 lg:h-24 flex items-center justify-between px-4 md:px-8 lg:px-12 bg-white/70 dark:bg-slate-900/70 backdrop-blur-md border-b border-slate-50 dark:border-slate-800 w-full shrink-0 z-30 transition-colors no-print sticky top-0">
     <div className="flex-1 flex items-center gap-4 max-w-[240px] md:max-w-md">
-      <div className="lg:hidden flex items-center gap-2 cursor-pointer" onClick={() => onNavigate('pantry')}>
+      <div className="lg:hidden flex items-center gap-2 cursor-pointer" onClick={() => onNavigate('landing')}>
         <div className="size-9 flex items-center justify-center bg-primary rounded-xl shadow-md shadow-primary/20">
           <span className="material-symbols-outlined !text-[18px] text-white font-black">nutrition</span>
         </div>
@@ -157,7 +157,7 @@ const Header: React.FC<{
     <div className="flex items-center gap-3 md:gap-6">
       <button 
         onClick={toggleDarkMode}
-        className="size-10 md:size-12 flex items-center justify-center rounded-2xl bg-slate-100/50 dark:bg-slate-800 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all active:scale-95"
+        className="size-10 md:size-12 flex items-center justify-center rounded-2xl bg-slate-100/50 dark:bg-slate-800 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all active:scale-95 icon-button"
       >
         <span className="material-symbols-outlined text-[20px] md:text-[24px]">{isDarkMode ? 'light_mode' : 'dark_mode'}</span>
       </button>
@@ -174,8 +174,180 @@ const Header: React.FC<{
   </header>
 );
 
+const Landing: React.FC<{ 
+  onNavigate: (view: ViewState) => void;
+  isDarkMode: boolean;
+  toggleDarkMode: () => void;
+}> = ({ onNavigate, isDarkMode, toggleDarkMode }) => {
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const trendingRecipes = [
+    { title: "Mediterranean Quinoa Bowl", time: "15 mins", diff: "Easy", popular: true, img: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?q=80&w=800&auto=format&fit=crop" },
+    { title: "Zesty Lemon Salmon", time: "25 mins", diff: "Medium", popular: false, img: "https://images.unsplash.com/photo-1467003909585-2f8a72700288?q=80&w=800&auto=format&fit=crop" },
+    { title: "Avocado Toast with Egg", time: "10 mins", diff: "Easy", popular: false, img: "https://images.unsplash.com/photo-1525351484163-7529414344d8?q=80&w=800&auto=format&fit=crop" },
+    { title: "Chicken Teriyaki Bowl", time: "30 mins", diff: "Medium", popular: true, img: "https://images.unsplash.com/photo-1526318896980-cf78c088247c?q=80&w=800&auto=format&fit=crop" },
+    { title: "Pesto Pasta", time: "15 mins", diff: "Easy", popular: false, img: "https://images.unsplash.com/photo-1473093226795-af9932fe5856?q=80&w=800&auto=format&fit=crop" },
+    { title: "Veggie Burrito Bowl", time: "20 mins", diff: "Easy", popular: false, img: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?q=80&w=800&auto=format&fit=crop" },
+    { title: "Mushroom Risotto", time: "40 mins", diff: "Hard", popular: false, img: "https://images.unsplash.com/photo-1476124369491-e7addf5db371?q=80&w=800&auto=format&fit=crop" },
+    { title: "Tuna Poke Bowl", time: "15 mins", diff: "Easy", popular: true, img: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=800&auto=format&fit=crop" },
+    { title: "Lentil Power Salad", time: "20 mins", diff: "Easy", popular: false, img: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?q=80&w=800&auto=format&fit=crop" },
+    { title: "Chickpea Curry", time: "35 mins", diff: "Medium", popular: false, img: "https://images.unsplash.com/photo-1585937421612-70a008356fbe?q=80&w=800&auto=format&fit=crop" }
+  ];
+
+  const scroll = (direction: 'left' | 'right') => {
+    if (scrollRef.current) {
+      const { scrollLeft, clientWidth } = scrollRef.current;
+      const scrollTo = direction === 'left' ? scrollLeft - clientWidth : scrollLeft + clientWidth;
+      scrollRef.current.scrollTo({ left: scrollTo, behavior: 'smooth' });
+    }
+  };
+
+  return (
+    <div className="flex-1 flex flex-col min-h-screen bg-white dark:bg-slate-950 overflow-y-auto no-scrollbar">
+      {/* Landing Header */}
+      <header className="flex items-center justify-between px-6 md:px-12 py-6 sticky top-0 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md z-[60]">
+        <div className="flex items-center gap-3 cursor-pointer group" onClick={() => onNavigate('landing')}>
+          <div className="size-8 flex items-center justify-center bg-primary rounded-xl group-hover:rotate-6 transition-transform shadow-lg shadow-primary/20">
+            <span className="material-symbols-outlined !text-[18px] text-white font-black">nutrition</span>
+          </div>
+          <h1 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">ChefMistri</h1>
+        </div>
+        
+        <nav className="hidden md:flex items-center gap-8">
+          {['Features', 'Recipes', 'Pricing'].map(link => (
+            <button key={link} onClick={() => onNavigate('landing')} className="text-sm font-bold text-slate-500 dark:text-slate-400 hover:text-primary transition-colors">{link}</button>
+          ))}
+        </nav>
+
+        <div className="flex items-center gap-4">
+          <button onClick={toggleDarkMode} className="size-10 flex items-center justify-center rounded-xl bg-slate-50 dark:bg-slate-900 text-slate-500 transition-all active:scale-95 icon-button yellow-glow-button">
+            <span className="material-symbols-outlined">{isDarkMode ? 'light_mode' : 'dark_mode'}</span>
+          </button>
+          <button onClick={() => onNavigate('pantry')} className="text-sm font-bold text-slate-600 dark:text-slate-300 hover:text-primary transition-colors px-4">Login</button>
+          <button onClick={() => onNavigate('pantry')} className="px-6 py-2.5 bg-primary text-white text-sm font-black rounded-xl hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 active:scale-95">Sign Up</button>
+        </div>
+      </header>
+
+      {/* Hero Section */}
+      <section className="relative px-6 md:px-12 py-12 lg:py-24 flex flex-col items-center">
+        <div className="max-w-7xl w-full relative rounded-[3rem] md:rounded-[4.5rem] overflow-hidden aspect-[16/9] md:aspect-[21/9] flex items-center justify-center">
+          <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=2000&auto=format&fit=crop" alt="Food bowl" className="absolute inset-0 w-full h-full object-cover scale-105" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/60"></div>
+          
+          <div className="relative z-10 text-center flex flex-col items-center max-w-4xl px-6">
+            <h2 className="text-4xl md:text-7xl font-black text-white mb-6 tracking-tighter leading-none">Cook Smarter, Not Harder</h2>
+            <p className="text-lg md:text-2xl text-white/90 font-medium mb-10 leading-relaxed">Turn your pantry into delicious meals with AI-powered recipe discovery and smart management.</p>
+            <div className="flex flex-wrap items-center justify-center gap-4 md:gap-6">
+              <button onClick={() => onNavigate('pantry')} className="px-10 py-5 bg-primary text-white text-lg font-black rounded-[1.8rem] hover:bg-primary-hover transition-all shadow-2xl shadow-primary/40 active:scale-95">Get Started for Free</button>
+              <button onClick={() => onNavigate('landing')} className="px-10 py-5 bg-white/10 backdrop-blur-md text-white border border-white/20 text-lg font-black rounded-[1.8rem] hover:bg-white/20 transition-all flex items-center gap-3 active:scale-95">
+                <span className="material-symbols-outlined fill-1">play_circle</span>
+                Watch Demo
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section className="px-6 md:px-12 py-20 lg:py-32 max-w-7xl mx-auto w-full">
+        <div className="max-w-2xl mb-16">
+          <h2 className="section-title text-3xl md:text-5xl font-black text-slate-900 dark:text-white mb-4 tracking-tighter">Effortless Kitchen Management</h2>
+          <p className="section-subtitle text-slate-500 dark:text-slate-400 font-bold text-lg leading-relaxed">Our smart tools help you save time, reduce food waste, and make grocery shopping a breeze.</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {[
+            { title: 'Pantry Tracking', icon: 'inventory_2', color: 'bg-emerald-100 text-emerald-600', desc: 'Never let ingredients go to waste. Track what you have in real-time with smart notifications.' },
+            { title: 'Smart Meal Planning', icon: 'calendar_month', color: 'bg-primary/10 text-primary', desc: 'Personalized weekly menus generated by AI based on your taste and dietary preferences.' },
+            { title: 'Automated Lists', icon: 'shopping_cart', color: 'bg-sky-100 text-sky-600', desc: 'Shop faster with intelligent lists synced automatically from your meal plan and pantry needs.' }
+          ].map((feature, i) => (
+            <div key={i} className="bg-slate-50 dark:bg-slate-900/50 p-10 rounded-[3rem] border border-slate-100 dark:border-slate-800 transition-all hover:shadow-2xl hover:shadow-slate-100 dark:hover:shadow-none group">
+              <div className={`size-14 rounded-2xl flex items-center justify-center mb-8 ${feature.color} group-hover:scale-110 transition-transform`}>
+                <span className="material-symbols-outlined !text-[32px]">{feature.icon}</span>
+              </div>
+              <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-4 tracking-tight">{feature.title}</h3>
+              <p className="text-slate-500 dark:text-slate-400 font-bold text-base leading-relaxed">{feature.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Trending Recipes */}
+      <section className="px-6 md:px-12 py-20 lg:py-32 bg-slate-50/50 dark:bg-slate-900/30">
+        <div className="max-w-7xl mx-auto w-full">
+          <div className="flex items-center justify-between mb-16">
+            <h2 className="text-3xl md:text-5xl font-black text-slate-900 dark:text-white tracking-tighter">Trending Recipes</h2>
+            <div className="flex gap-4">
+              <button onClick={() => scroll('left')} className="size-11 rounded-full border border-slate-200 dark:border-slate-800 flex items-center justify-center text-slate-400 hover:text-primary transition-all active:scale-90 icon-button">
+                <span className="material-symbols-outlined">chevron_left</span>
+              </button>
+              <button onClick={() => scroll('right')} className="size-11 rounded-full border border-slate-200 dark:border-slate-800 flex items-center justify-center text-slate-400 hover:text-primary transition-all active:scale-90 icon-button">
+                <span className="material-symbols-outlined">chevron_right</span>
+              </button>
+            </div>
+          </div>
+
+          <div ref={scrollRef} className="flex gap-10 overflow-x-auto no-scrollbar scroll-smooth snap-x snap-mandatory pb-8">
+            {trendingRecipes.map((recipe, i) => (
+              <div key={i} className="flex-none w-[calc(100%)] sm:w-[calc(50%-1.25rem)] lg:w-[calc(33.333%-1.67rem)] snap-start group cursor-pointer flex flex-col gap-6">
+                <div className="aspect-[4/3] rounded-[3rem] overflow-hidden relative shadow-lg group-hover:shadow-2xl transition-all duration-500">
+                  <img src={recipe.img} alt={recipe.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                  {recipe.popular && (
+                    <span className="absolute top-6 left-6 px-4 py-1.5 bg-primary text-white text-[10px] font-black uppercase tracking-widest rounded-full shadow-lg">Popular</span>
+                  )}
+                </div>
+                <div className="px-2">
+                  <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-3 tracking-tight group-hover:text-primary transition-colors">{recipe.title}</h3>
+                  <div className="flex items-center gap-6 text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+                    <div className="flex items-center gap-2">
+                      <span className="material-symbols-outlined text-[20px]">timer</span>
+                      {recipe.time}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="material-symbols-outlined text-[20px]">bar_chart</span>
+                      {recipe.diff}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="px-6 md:px-12 py-12 md:py-20 border-t border-slate-100 dark:border-slate-900 bg-white dark:bg-slate-950">
+        <div className="max-w-7xl mx-auto w-full flex flex-col items-center">
+          <div className="flex items-center gap-3 mb-10 group cursor-pointer" onClick={() => onNavigate('landing')}>
+            <div className="size-8 flex items-center justify-center bg-primary rounded-xl">
+              <span className="material-symbols-outlined !text-[18px] text-white font-black">nutrition</span>
+            </div>
+            <h2 className="text-xl font-black text-slate-900 dark:text-white">ChefMistri</h2>
+          </div>
+
+          <div className="flex flex-wrap justify-center gap-8 md:gap-12 mb-12">
+            {['About Us', 'Contact', 'Privacy Policy', 'Terms of Service'].map(link => (
+              <button key={link} className="text-sm font-bold text-slate-500 hover:text-primary transition-colors">{link}</button>
+            ))}
+          </div>
+
+          <div className="flex gap-6 mb-12">
+            {['camera', 'alternate_email', 'link'].map(icon => (
+              <button key={icon} className="size-11 rounded-full bg-slate-100 dark:bg-slate-900 text-slate-500 hover:bg-primary hover:text-white transition-all flex items-center justify-center active:scale-90">
+                <span className="material-symbols-outlined text-[20px]">{icon}</span>
+              </button>
+            ))}
+          </div>
+
+          <p className="text-slate-400 text-xs font-bold">© {new Date().getFullYear()} ChefMistri Inc. All rights reserved.</p>
+        </div>
+      </footer>
+    </div>
+  );
+};
+
 export default function App() {
-  const [view, setView] = useState<ViewState>('pantry');
+  const [view, setView] = useState<ViewState>('landing');
   const [pantry, setPantry] = useState<Ingredient[]>([]);
   const [recommendations, setRecommendations] = useState<Recipe[]>(MOCK_RECIPES);
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
@@ -386,6 +558,8 @@ export default function App() {
 
   const renderContent = () => {
     switch (view) {
+      case 'landing':
+        return <Landing onNavigate={setView} isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} />;
       case 'pantry':
         return (
           <div className="flex flex-col lg:flex-row flex-1 p-4 md:p-8 lg:p-12 gap-8 md:gap-12">
@@ -486,7 +660,7 @@ export default function App() {
                       <p className="text-slate-400 dark:text-slate-500 text-[11px] font-black uppercase tracking-[0.2em]">{pantry.length} Active Items</p>
                     </div>
                   </div>
-                  <button onClick={() => setPantry([])} className="size-10 md:size-12 rounded-2xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all active:scale-90">
+                  <button onClick={() => setPantry([])} className="size-10 md:size-12 rounded-2xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all active:scale-90 icon-button">
                     <span className="material-symbols-outlined text-[20px] md:text-[24px]">delete</span>
                   </button>
                 </div>
@@ -507,7 +681,7 @@ export default function App() {
                             <span className="text-[10px] text-slate-300 font-bold">• Fresh</span>
                           </div>
                         </div>
-                        <button onClick={() => setPantry(pantry.filter(p => p.id !== item.id))} className="text-slate-300 hover:text-red-500 transition-all p-2 rounded-xl hover:bg-white active:scale-90">
+                        <button onClick={() => setPantry(pantry.filter(p => p.id !== item.id))} className="text-slate-300 hover:text-red-500 transition-all p-2 rounded-xl hover:bg-white active:scale-90 icon-button">
                           <span className="material-symbols-outlined text-[20px] md:text-[24px]">close</span>
                         </button>
                       </div>
@@ -587,13 +761,13 @@ export default function App() {
                       {/* Navigation Arrows */}
                       <button 
                         onClick={() => handleScrollWeek(weekOffset, 'left')}
-                        className="absolute left-[-22px] top-[50%] -translate-y-[50%] size-11 rounded-full bg-slate-900/80 dark:bg-white/80 backdrop-blur-md text-white dark:text-slate-900 flex items-center justify-center z-20 shadow-xl opacity-0 group-hover:opacity-100 transition-all hover:scale-110 active:scale-90"
+                        className="absolute left-[-16px] top-[50%] -translate-y-[50%] size-11 rounded-full bg-slate-900/80 dark:bg-white/80 backdrop-blur-md text-white dark:text-slate-900 flex items-center justify-center z-20 shadow-xl opacity-0 group-hover:opacity-100 transition-all hover:scale-110 active:scale-90 planner-arrow left icon-button"
                       >
                         <span className="material-symbols-outlined">chevron_left</span>
                       </button>
                       <button 
                         onClick={() => handleScrollWeek(weekOffset, 'right')}
-                        className="absolute right-[-22px] top-[50%] -translate-y-[50%] size-11 rounded-full bg-slate-900/80 dark:bg-white/80 backdrop-blur-md text-white dark:text-slate-900 flex items-center justify-center z-20 shadow-xl opacity-0 group-hover:opacity-100 transition-all hover:scale-110 active:scale-90"
+                        className="absolute right-[-16px] top-[50%] -translate-y-[50%] size-11 rounded-full bg-slate-900/80 dark:bg-white/80 backdrop-blur-md text-white dark:text-slate-900 flex items-center justify-center z-20 shadow-xl opacity-0 group-hover:opacity-100 transition-all hover:scale-110 active:scale-90 planner-arrow right icon-button"
                       >
                         <span className="material-symbols-outlined">chevron_right</span>
                       </button>
@@ -626,10 +800,10 @@ export default function App() {
                                 </div>
                                 <div className="flex flex-col items-end gap-3">
                                   <div className="flex gap-2 no-print">
-                                    <button onClick={() => shuffleDayPlan(dayKey, 'balanced')} className="size-9 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-400 hover:text-primary transition-all" title="Shuffle Balanced">
+                                    <button onClick={() => shuffleDayPlan(dayKey, 'balanced')} className="size-9 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-400 hover:text-primary transition-all icon-button" title="Shuffle Balanced">
                                       <span className="material-symbols-outlined text-[18px]">shuffle</span>
                                     </button>
-                                    <button onClick={() => clearDayPlan(dayKey)} className="size-9 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-400 hover:text-red-500 transition-all" title="Reset Day">
+                                    <button onClick={() => clearDayPlan(dayKey)} className="size-9 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-400 hover:text-red-500 transition-all icon-button" title="Reset Day">
                                       <span className="material-symbols-outlined text-[18px]">delete_sweep</span>
                                     </button>
                                   </div>
@@ -660,7 +834,7 @@ export default function App() {
                                           </div>
                                           <button 
                                             onClick={() => setMealPlan(prev => ({ ...prev, [dayKey]: { ...prev[dayKey], [slot]: null } }))}
-                                            className="absolute top-5 right-5 text-slate-300 hover:text-red-500 transition-all opacity-0 group-hover:opacity-100 p-1 no-print"
+                                            className="absolute top-5 right-5 text-slate-300 hover:text-red-500 transition-all opacity-0 group-hover:opacity-100 p-1 no-print icon-button"
                                           >
                                             <span className="material-symbols-outlined text-[18px]">close</span>
                                           </button>
@@ -825,7 +999,7 @@ export default function App() {
 
                         <button 
                           onClick={(e) => { e.stopPropagation(); deleteGrocery(item.id); }}
-                          className="size-10 md:size-12 rounded-2xl flex items-center justify-center text-slate-200 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 md:opacity-0 group-hover/item:opacity-100 transition-all no-print active:scale-90"
+                          className="size-10 md:size-12 rounded-2xl flex items-center justify-center text-slate-200 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 md:opacity-0 group-hover/item:opacity-100 transition-all no-print active:scale-90 icon-button"
                         >
                           <span className="material-symbols-outlined text-[20px] md:text-[24px]">close</span>
                         </button>
@@ -993,20 +1167,26 @@ export default function App() {
 
   return (
     <div className={`min-h-screen flex flex-col lg:flex-row transition-colors ${isDarkMode ? 'bg-[#0a0f0b]' : 'bg-[#F9FCFA]'}`}>
-      <Sidebar currentView={view} onNavigate={setView} />
-      
-      <div className="flex-1 flex flex-col h-screen overflow-hidden relative">
-        <Header 
-          onNavigate={setView} 
-          onSearch={setSearchQuery} 
-          isDarkMode={isDarkMode} 
-          toggleDarkMode={toggleDarkMode} 
-        />
-        <main className="flex-1 flex flex-col overflow-y-auto overflow-x-hidden no-scrollbar">
-          {renderContent()}
-        </main>
-        <BottomNav currentView={view} onNavigate={setView} />
-      </div>
+      {view === 'landing' ? (
+        renderContent()
+      ) : (
+        <>
+          <Sidebar currentView={view} onNavigate={setView} />
+          
+          <div className="flex-1 flex flex-col h-screen overflow-hidden relative">
+            <Header 
+              onNavigate={setView} 
+              onSearch={setSearchQuery} 
+              isDarkMode={isDarkMode} 
+              toggleDarkMode={toggleDarkMode} 
+            />
+            <main className="flex-1 flex flex-col overflow-y-auto overflow-x-hidden no-scrollbar">
+              {renderContent()}
+            </main>
+            <BottomNav currentView={view} onNavigate={setView} />
+          </div>
+        </>
+      )}
       
       {isGenerating && (
         <div className="fixed inset-0 z-[200] bg-slate-900/60 backdrop-blur-2xl flex items-center justify-center animate-in fade-in zoom-in duration-500 p-6">
@@ -1035,7 +1215,7 @@ export default function App() {
             <p className="opacity-70 font-black mb-1 text-xs md:text-sm uppercase tracking-widest">Kitchen Alert</p>
             <p className="leading-snug">{errorMsg}</p>
           </div>
-          <button onClick={() => setErrorMsg(null)} className="p-2 md:p-3 hover:bg-white/10 rounded-2xl transition-all active:scale-90">
+          <button onClick={() => setErrorMsg(null)} className="p-2 md:p-3 hover:bg-white/10 rounded-2xl transition-all active:scale-90 icon-button">
             <span className="material-symbols-outlined text-[24px] md:text-[32px]">close</span>
           </button>
         </div>
