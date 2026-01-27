@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   ViewState, 
@@ -262,7 +261,7 @@ const Landing: React.FC<{
           </button>
         </div>
 
-        <div className="w-full max-w-6xl relative group">
+        <div className="w-full max-w-6xl relative group mt-8 lg:-mt-12 px-4">
            <div className="absolute inset-0 bg-primary/5 blur-3xl rounded-full scale-90 translate-y-10"></div>
            <TiltedCard
               imageSrc="https://images.pexels.com/photos/12362926/pexels-photo-12362926.jpeg"
@@ -285,7 +284,7 @@ const Landing: React.FC<{
       </section>
 
       {/* Features Section */}
-      <section className="px-4 sm:px-12 py-32 max-w-7xl mx-auto w-full">
+      <section className="px-4 sm:px-12 pt-24 pb-32 lg:py-32 max-w-7xl mx-auto w-full">
         <div className="text-center mb-24">
           <h2 className="text-4xl sm:text-5xl font-black text-slate-900 dark:text-white tracking-tighter mb-4 font-aesthetic">Effortless Kitchen Management</h2>
           <p className="text-slate-500 dark:text-slate-400 font-medium text-lg max-w-2xl mx-auto font-aesthetic">Our smart tools help you save time, reduce food waste, and make grocery shopping a breeze.</p>

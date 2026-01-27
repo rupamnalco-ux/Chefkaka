@@ -32,9 +32,8 @@
 }
 
 .tilted-card-img {
-  position: absolute;
-  top: 0;
-  left: 0;
+  position: relative; /* Changed from absolute to relative to respect layout flow */
+  display: block;
   object-fit: cover;
   border-radius: 3rem; /* Adjusted to match ChefMistri aesthetic */
   will-change: transform;

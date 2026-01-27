@@ -1,18 +1,21 @@
 
+import React from 'react';
+
 declare global {
   namespace NodeJS {
     interface ProcessEnv {
       API_KEY: string;
     }
   }
+}
 
-  /* 
-   * Augmented JSX namespace to include 'iconify-icon' custom element.
-   * This resolves the 'Property does not exist on type JSX.IntrinsicElements' error.
-   */
+declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
-      'iconify-icon': any;
+      'iconify-icon': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & { 
+        icon?: string; 
+        width?: string | number;
+      };
     }
   }
 }

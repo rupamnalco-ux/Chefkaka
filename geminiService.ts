@@ -31,28 +31,16 @@ const extractJSON = (text: string) => {
   }
 };
 
-const getAI = () => {
-  const apiKey = process.env.API_KEY;
-  if (!apiKey) {
-    return null;
-  }
-  return new GoogleGenAI({ apiKey });
-};
-
 /**
- * Generates a high-quality food image for a given recipe title.
+ * Generates a high-quality food image for a given recipe title using Gemini.
  */
 export const generateAIImage = async (prompt: string): Promise<string> => {
-  // Pollinations.ai is a robust, free AI image generator via URL. 
-  // It does NOT require an API Key.
-  // We use a simplified URL structure to ensure maximum compatibility.
   const seed = Math.floor(Math.random() * 10000);
   const fallback = `https://image.pollinations.ai/prompt/professional%20food%20photography%20of%20${encodeURIComponent(prompt)}?width=1024&height=1024&seed=${seed}&model=flux`;
   
   try {
-    const ai = getAI();
-    // If no API key, return the high-quality AI fallback immediately
-    if (!ai) return fallback;
+    // Correctly initialize right before the call as per guidelines
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash-image',
@@ -67,8 +55,10 @@ export const generateAIImage = async (prompt: string): Promise<string> => {
     const candidate = response.candidates?.[0];
     if (candidate?.content?.parts) {
       for (const part of candidate.content.parts) {
+        // Find the image part in the response
         if (part.inlineData) {
-          return `data:image/png;base64,${part.inlineData.data}`;
+          const base64EncodeString: string = part.inlineData.data;
+          return `data:image/png;base64,${base64EncodeString}`;
         }
       }
     }
@@ -116,19 +106,20 @@ const fullRecipeSchema = {
   required: ["title", "description", "prepTime", "cookTime", "ingredients", "steps", "difficulty", "nutrition"]
 };
 
+/**
+ * Uses Gemini to generate recipes based on provided ingredients and user preferences.
+ */
 export const generateRecipesFromPantry = async (ingredients: string[], prefs: UserPreferences): Promise<Recipe[]> => {
   if (ingredients.length === 0) return [];
   
-  const ai = getAI();
-  if (!ai) {
-    throw new Error("The application is missing a valid API key configuration.");
-  }
-
-  const prompt = `Return strictly a JSON array of 3 creative recipes using these ingredients: ${ingredients.join(', ')}. 
-  Diet: ${prefs.dietType}. Allergies: ${prefs.allergies.join(', ') || 'None'}. Level: ${prefs.skillLevel}. 
-  Do not include markdown headers. Output ONLY JSON.`;
-
   try {
+    // Correctly initialize right before the call
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    
+    const prompt = `Return strictly a JSON array of 3 creative recipes using these ingredients: ${ingredients.join(', ')}. 
+    Diet: ${prefs.dietType}. Allergies: ${prefs.allergies.join(', ') || 'None'}. Level: ${prefs.skillLevel}. 
+    Do not include markdown headers. Output ONLY JSON.`;
+
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
       contents: prompt,
@@ -141,12 +132,12 @@ export const generateRecipesFromPantry = async (ingredients: string[], prefs: Us
       }
     });
 
+    // Directly access .text property as per extraction rules
     const results = extractJSON(response.text || "[]");
     
-    // Process recipes sequentially
     const recipes: Recipe[] = [];
     for (const r of results) {
-      // Small delay to prevent rate limits
+      // Small delay to prevent rate limiting during sequential image generation
       await new Promise(resolve => setTimeout(resolve, 100));
       const image = await generateAIImage(r.title);
       recipes.push({
