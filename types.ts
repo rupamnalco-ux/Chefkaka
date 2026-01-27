@@ -1,6 +1,7 @@
 
 import React from 'react';
 
+// Use declare global to augment global namespaces correctly across different environments
 declare global {
   namespace NodeJS {
     interface ProcessEnv {
@@ -9,6 +10,7 @@ declare global {
   }
 }
 
+/* Fix: Augment the 'react' module's JSX namespace to add 'iconify-icon' while preserving all standard HTML elements like div, span, img, etc. */
 declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {

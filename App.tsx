@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   ViewState, 
@@ -232,7 +233,7 @@ const Landing: React.FC<{
       </header>
 
       {/* Hero Section */}
-      <section className="relative px-4 sm:px-12 py-16 flex flex-col items-center">
+      <section className="relative px-4 sm:px-12 pt-16 pb-12 lg:pb-32 flex flex-col items-center">
         <div className="mb-8">
            <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary/10 text-primary rounded-full text-[10px] font-black uppercase tracking-widest border border-primary/20 font-aesthetic">
               <span className="w-1.5 h-1.5 rounded-full bg-primary"></span>
@@ -250,26 +251,27 @@ const Landing: React.FC<{
           </p>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto mb-20 font-aesthetic">
-          <button onClick={() => onNavigate('pantry')} className="w-full sm:w-auto px-10 py-5 bg-primary text-white text-lg font-bold rounded-2xl hover:bg-primary-hover transition-all shadow-xl shadow-primary/20 flex items-center justify-center gap-3 active:scale-95">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto mb-16 sm:mb-24 font-aesthetic z-20 relative">
+          <button onClick={() => onNavigate('pantry')} className="w-full sm:w-auto px-10 py-5 bg-primary text-white text-lg font-bold rounded-2xl hover:bg-primary-hover transition-all shadow-xl shadow-primary/20 flex items-center justify-center gap-3 active:scale-95 group">
             Get Started Free
-            <span className="material-symbols-outlined !text-[20px]">arrow_forward</span>
+            <span className="material-symbols-outlined !text-[20px] transition-transform group-hover:translate-x-1">arrow_forward</span>
           </button>
-          <button className="w-full sm:w-auto px-10 py-5 bg-white dark:bg-slate-900 text-slate-900 dark:text-white border-2 border-slate-100 dark:border-slate-800 text-lg font-bold rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-all flex items-center justify-center gap-3 active:scale-95">
-            <span className="material-symbols-outlined fill-1 !text-[24px]">play_circle</span>
+          <button className="w-full sm:w-auto px-10 py-5 bg-white dark:bg-slate-900 text-slate-900 dark:text-white border-2 border-slate-100 dark:border-slate-800 text-lg font-bold rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-all flex items-center justify-center gap-3 active:scale-95 group">
+            <span className="material-symbols-outlined !text-[28px] text-slate-400 group-hover:text-primary transition-colors">play_circle</span>
             Watch Demo
           </button>
         </div>
 
-        <div className="w-full max-w-6xl relative group mt-8 lg:-mt-12 px-4">
-           <div className="absolute inset-0 bg-primary/5 blur-3xl rounded-full scale-90 translate-y-10"></div>
+        {/* Hero Card Container - Fixed to prevent collapse */}
+        <div className="w-full max-w-6xl relative group mt-0 lg:-mt-20 px-4 z-10 min-h-[300px] md:min-h-[500px]">
+           <div className="absolute inset-0 bg-primary/10 blur-[120px] rounded-full scale-75 translate-y-20 opacity-40"></div>
            <TiltedCard
-              imageSrc="https://images.pexels.com/photos/12362926/pexels-photo-12362926.jpeg"
-              altText="Gourmet Platter Display"
-              captionText="Discover Gourmet Recipes"
-              containerHeight="auto"
+              imageSrc="https://images.unsplash.com/photo-1626700051175-6818013e1d4f?q=80&w=1200"
+              altText="Gourmet Takeout Feast"
+              captionText="The Ultimate Platter"
+              containerHeight="100%"
               containerWidth="100%"
-              imageHeight="auto"
+              imageHeight="600px" // Explicit height to prevent collapse
               imageWidth="100%"
               rotateAmplitude={6}
               scaleOnHover={1.02}
@@ -426,19 +428,15 @@ const Landing: React.FC<{
             ))}
           </div>
 
-          {/* Colorful Social Icons */}
           <div className="flex gap-4 mb-16">
-              {/* X (Twitter) */}
-              <a href="#" className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center hover:opacity-80 transition-all shadow-md shadow-zinc-200">
-                  <iconify-icon icon="ri:twitter-x-fill" width="18"></iconify-icon>
+              <a href="https://x.com" target="_blank" rel="noopener noreferrer" className="size-10 rounded-full bg-slate-100 dark:bg-slate-900 flex items-center justify-center text-slate-400 hover:text-primary transition-all">
+                <iconify-icon icon="ri:twitter-x-fill" width="18"></iconify-icon>
               </a>
-              {/* YouTube */}
-              <a href="#" className="w-10 h-10 rounded-full bg-[#FF0000] text-white flex items-center justify-center hover:opacity-80 transition-all shadow-md shadow-red-100">
-                  <iconify-icon icon="ri:youtube-fill" width="20"></iconify-icon>
+              <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="size-10 rounded-full bg-slate-100 dark:bg-slate-900 flex items-center justify-center text-slate-400 hover:text-primary transition-all">
+                <iconify-icon icon="ri:youtube-fill" width="20"></iconify-icon>
               </a>
-              {/* Meta */}
-              <a href="#" className="w-10 h-10 rounded-full bg-[#0064E0] text-white flex items-center justify-center hover:opacity-80 transition-all shadow-md shadow-blue-100">
-                  <iconify-icon icon="ri:meta-fill" width="22"></iconify-icon>
+              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="size-10 rounded-full bg-slate-100 dark:bg-slate-900 flex items-center justify-center text-slate-400 hover:text-primary transition-all">
+                <iconify-icon icon="ri:meta-fill" width="20"></iconify-icon>
               </a>
           </div>
 
@@ -1138,48 +1136,105 @@ export default function App() {
       case 'recipe-details':
         if (!selectedRecipe) return null;
         return (
-          <main className="w-full max-w-7xl mx-auto p-4 md:p-8 lg:p-12 animate-in fade-in duration-500 overflow-y-auto mb-24 md:mb-0">
+          <main className="w-full max-w-5xl mx-auto p-4 md:p-8 lg:p-12 animate-in fade-in duration-500 overflow-y-auto mb-24 md:mb-0">
             <button onClick={() => setView('recommendations')} className="flex items-center gap-3 font-black text-slate-300 hover:text-primary transition-all mb-8 md:mb-14 text-base md:text-lg group">
               <span className="material-symbols-outlined text-[20px] md:text-[24px] group-hover:-translate-x-2 transition-transform">arrow_back</span> 
               Back to feed
             </button>
-            <div className="flex flex-col gap-10 md:gap-20 pb-16 md:pb-32">
+            
+            <div className="flex flex-col gap-10 md:gap-16 pb-16 md:pb-32">
+              {/* Header Info */}
               <div className="flex flex-col gap-6">
-                <h1 className="text-4xl md:text-7xl lg:text-8xl font-black text-slate-900 dark:text-white leading-[1.1] tracking-tighter">{selectedRecipe.title}</h1>
-                <div className="flex flex-wrap items-center gap-3 md:gap-5 mt-4">
-                  <div className="flex items-center gap-2 md:gap-3 px-5 md:px-8 py-3 md:py-4 bg-primary/10 text-primary font-black text-xs md:text-lg rounded-[1.5rem] md:rounded-[2rem] shadow-sm">
-                    <span className="material-symbols-outlined text-[20px] md:text-[28px]">local_fire_department</span>
+                <h1 className="text-4xl md:text-6xl lg:text-7xl font-black text-slate-900 dark:text-white leading-[1.1] tracking-tighter">{selectedRecipe.title}</h1>
+                <div className="flex flex-wrap items-center gap-3 md:gap-4 mt-2">
+                  <div className="flex items-center gap-2 md:gap-2.5 px-4 md:px-6 py-2 md:py-3 bg-primary/10 text-primary font-black text-xs md:text-base rounded-full border border-primary/20">
+                    <span className="material-symbols-outlined text-[18px] md:text-[24px]">local_fire_department</span>
                     {selectedRecipe.calories}
                   </div>
-                  <div className="flex items-center gap-2 md:gap-3 px-5 md:px-8 py-3 md:py-4 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-300 font-black text-xs md:text-lg rounded-[1.5rem] md:rounded-[2rem]">
-                    <span className="material-symbols-outlined text-[20px] md:text-[28px]">schedule</span>
+                  <div className="flex items-center gap-2 md:gap-2.5 px-4 md:px-6 py-2 md:py-3 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-300 font-black text-xs md:text-base rounded-full">
+                    <span className="material-symbols-outlined text-[18px] md:text-[24px]">schedule</span>
                     {selectedRecipe.cookTime}
                   </div>
-                  <div className="flex items-center gap-2 md:gap-3 px-5 md:px-8 py-3 md:py-4 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-300 font-black text-xs md:text-lg rounded-[1.5rem] md:rounded-[2rem]">
-                    <span className="material-symbols-outlined text-[20px] md:text-[28px]">group</span>
+                  <div className="flex items-center gap-2 md:gap-2.5 px-4 md:px-6 py-2 md:py-3 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-300 font-black text-xs md:text-base rounded-full">
+                    <span className="material-symbols-outlined text-[18px] md:text-[24px]">group</span>
                     {selectedRecipe.servings} Servings
                   </div>
                 </div>
-                <p className="text-lg md:text-2xl lg:text-3xl font-bold text-slate-400 dark:text-slate-500 leading-relaxed max-w-4xl mt-6 md:mt-8">{selectedRecipe.description}</p>
+                <p className="text-lg md:text-2xl font-bold text-slate-400 dark:text-slate-500 leading-relaxed max-w-4xl mt-4">{selectedRecipe.description}</p>
               </div>
-              <div className="flex flex-col xl:flex-row gap-10 md:gap-20 items-stretch">
-                <div className="xl:w-3/5 w-full h-[320px] md:h-[600px] lg:h-[700px]">
-                  <RecipeImage src={selectedRecipe.image} alt={selectedRecipe.title} className="w-full h-full rounded-[3rem] md:rounded-[5rem] shadow-2xl shadow-slate-200/50 dark:shadow-none object-cover" />
+
+              {/* Image and Ingredients Grid */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 md:gap-14 items-start">
+                <div className="w-full h-[300px] md:h-[500px] lg:h-[600px]">
+                  <RecipeImage src={selectedRecipe.image} alt={selectedRecipe.title} className="w-full h-full rounded-[3rem] md:rounded-[4rem] shadow-2xl shadow-slate-200/50 dark:shadow-none object-cover border-4 border-white dark:border-slate-800" />
                 </div>
-                <div className="xl:w-2/5 w-full bg-slate-50 dark:bg-slate-900 p-10 md:p-16 rounded-[3rem] md:rounded-[5rem] border border-slate-100 dark:border-slate-800 shadow-sm transition-all hover:border-primary/20">
-                  <h3 className="text-3xl md:text-4xl lg:text-5xl font-black mb-10 md:mb-16 text-slate-900 dark:text-white tracking-tight">Ingredients</h3>
-                  <div className="flex flex-col gap-6 md:gap-12">
+                
+                <div className="bg-white dark:bg-slate-900 p-8 md:p-12 rounded-[3rem] md:rounded-[4rem] border border-slate-50 dark:border-slate-800 shadow-sm transition-all hover:border-primary/20">
+                  <h3 className="text-3xl md:text-4xl font-black mb-10 text-slate-900 dark:text-white tracking-tight">Ingredients</h3>
+                  <div className="flex flex-col gap-6 md:gap-8">
                     {selectedRecipe.ingredients.map((ing, i) => (
                       <div key={i} className="flex justify-between items-center group/ing">
-                        <span className="text-lg md:text-2xl font-black text-slate-900 dark:text-white group-hover/ing:text-primary transition-colors">{ing.name}</span>
-                        <div className="flex items-center gap-4">
-                           <div className="h-px w-8 md:w-16 bg-slate-200 dark:bg-slate-800 group-hover/ing:w-24 transition-all"></div>
-                           <span className="text-primary text-lg md:text-2xl font-black">{ing.amount}</span>
+                        <span className="text-lg md:text-xl font-black text-slate-900 dark:text-white group-hover/ing:text-primary transition-colors">{ing.name}</span>
+                        <div className="flex items-center gap-4 flex-1 px-4">
+                           <div className="h-px w-full bg-slate-100 dark:bg-slate-800 group-hover/ing:bg-primary/20 transition-all"></div>
                         </div>
+                        <span className="text-primary text-lg md:text-xl font-black shrink-0">{ing.amount}</span>
                       </div>
                     ))}
                   </div>
                 </div>
+              </div>
+
+              {/* Dietary Analysis */}
+              <div className="bg-white dark:bg-slate-900 p-8 md:p-12 rounded-[3rem] border border-slate-50 dark:border-slate-800">
+                 <div className="flex items-center gap-4 mb-10">
+                    <div className="size-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
+                       <span className="material-symbols-outlined">bar_chart</span>
+                    </div>
+                    <h3 className="text-3xl font-black text-slate-900 dark:text-white">Dietary Analysis</h3>
+                 </div>
+                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
+                    {[
+                      { label: 'Protein', value: selectedRecipe.nutrition.protein, color: 'bg-primary' },
+                      { label: 'Carbohydrates', value: selectedRecipe.nutrition.carbs, color: 'bg-blue-500' },
+                      { label: 'Healthy Fats', value: selectedRecipe.nutrition.fats, color: 'bg-orange-500' }
+                    ].map((macro) => (
+                      <div key={macro.label} className="flex flex-col gap-4">
+                        <div>
+                           <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">{macro.label}</span>
+                           <h4 className="text-4xl font-black text-slate-900 dark:text-white mt-1">{macro.value}</h4>
+                        </div>
+                        <div className="h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                           <div className={`h-full ${macro.color} rounded-full`} style={{ width: '70%' }}></div>
+                        </div>
+                      </div>
+                    ))}
+                 </div>
+              </div>
+
+              {/* Cooking Methodology */}
+              <div className="bg-slate-900 dark:bg-[#0d140e] p-10 md:p-16 lg:p-20 rounded-[4rem] text-white">
+                 <h3 className="text-3xl md:text-5xl font-black mb-14 tracking-tight">Cooking Methodology</h3>
+                 <div className="flex flex-col gap-12 relative">
+                    <div className="absolute left-6 top-10 bottom-10 w-px bg-white/10 hidden md:block"></div>
+                    {selectedRecipe.steps.map((step, i) => (
+                      <div key={i} className="flex gap-8 md:gap-12 relative z-10 group">
+                        <div className="size-12 md:size-14 rounded-2xl bg-white/10 group-hover:bg-primary/20 group-hover:text-primary transition-all flex items-center justify-center font-black text-xl shrink-0">
+                          {i + 1}
+                        </div>
+                        <p className="text-xl md:text-2xl font-bold text-slate-300 group-hover:text-white transition-colors leading-relaxed pt-2 md:pt-3">
+                          {step}
+                        </p>
+                      </div>
+                    ))}
+                 </div>
+                 <div className="mt-20 pt-10 border-t border-white/5 flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                       <span className="material-symbols-outlined text-primary">verified</span>
+                       <span className="text-sm font-black uppercase tracking-widest text-slate-500">Chef Verified Steps</span>
+                    </div>
+                    <button className="text-primary font-black uppercase tracking-widest text-sm hover:underline">Download Guide</button>
+                 </div>
               </div>
             </div>
           </main>

@@ -1,3 +1,4 @@
+
 import React, { useRef, useState } from 'react';
 import { motion, useMotionValue, useSpring } from 'motion/react';
 import './TiltedCard.css';
@@ -22,6 +23,8 @@ interface TiltedCardProps {
   showTooltip?: boolean;
   overlayContent?: React.ReactNode;
   displayOverlayContent?: boolean;
+  /* Fix: Explicitly include key in props interface to satisfy strict TypeScript checking in App.tsx */
+  key?: React.Key;
 }
 
 export default function TiltedCard({
