@@ -99,7 +99,7 @@ const RecipeImage: React.FC<{ src: string; alt: string; className?: string }> = 
 };
 
 const Sidebar: React.FC<{ currentView: ViewState; onNavigate: (view: ViewState) => void }> = ({ currentView, onNavigate }) => (
-  <aside className="hidden lg:flex w-72 shrink-0 flex-col h-screen sticky top-0 bg-white/40 dark:bg-slate-900/40 backdrop-blur-3xl border-r border-slate-200/50 dark:border-slate-800 p-8 z-40 transition-colors no-print">
+  <aside className="hidden lg:flex w-72 shrink-0 flex-col h-screen sticky top-0 bg-white dark:bg-slate-900 border-r border-slate-100 dark:border-slate-800 p-8 z-40 transition-colors no-print">
     <div className="flex items-center gap-3 mb-12 px-2 cursor-pointer group" onClick={() => onNavigate('landing')}>
       <div className="size-10 flex items-center justify-center bg-primary rounded-xl group-hover:rotate-6 transition-transform shadow-lg shadow-primary/20">
         <span className="material-symbols-outlined !text-[24px] text-white font-black">nutrition</span>
@@ -134,7 +134,7 @@ const Sidebar: React.FC<{ currentView: ViewState; onNavigate: (view: ViewState) 
       <div className="bg-primary/5 dark:bg-primary/10 rounded-[2.5rem] p-6 border border-primary/10">
         <h4 className="font-black text-slate-900 dark:text-white text-base mb-1">Go Premium</h4>
         <p className="text-slate-500 dark:text-slate-400 text-xs leading-relaxed mb-5 font-medium">Unlock AI nutrition tracking and smart meal scaling.</p>
-        <button className="w-full py-3 liquid-glass text-white text-sm font-black rounded-2xl active:scale-95 shadow-lg shadow-primary/20">
+        <button className="w-full py-3 bg-primary text-white text-sm font-black rounded-2xl hover:bg-primary-hover transition-all active:scale-95 shadow-lg shadow-primary/20">
           Upgrade Now
         </button>
       </div>
@@ -143,7 +143,7 @@ const Sidebar: React.FC<{ currentView: ViewState; onNavigate: (view: ViewState) 
 );
 
 const BottomNav: React.FC<{ currentView: ViewState; onNavigate: (view: ViewState) => void }> = ({ currentView, onNavigate }) => (
-  <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/40 dark:bg-slate-900/40 backdrop-blur-2xl border-t border-slate-100 dark:border-slate-800 px-2 py-3 pb-8 lg:pb-3 z-50 flex justify-around items-center no-print">
+  <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border-t border-slate-100 dark:border-slate-800 px-2 py-3 pb-8 lg:pb-3 z-50 flex justify-around items-center no-print">
     {[
       { id: 'pantry', label: 'Pantry', icon: 'inventory_2' },
       { id: 'recommendations', label: 'Feed', icon: 'restaurant' },
@@ -173,7 +173,7 @@ const Header: React.FC<{
   isDarkMode: boolean;
   toggleDarkMode: () => void;
 }> = ({ onNavigate, onSearch, isDarkMode, toggleDarkMode }) => (
-  <header className="h-16 md:h-20 lg:h-24 flex items-center justify-between px-4 md:px-8 lg:px-12 bg-white/40 dark:bg-slate-900/40 backdrop-blur-2xl border-b border-slate-200/50 dark:border-slate-800 w-full shrink-0 z-30 transition-colors no-print sticky top-0">
+  <header className="h-16 md:h-20 lg:h-24 flex items-center justify-between px-4 md:px-8 lg:px-12 bg-white/70 dark:bg-slate-900/70 backdrop-blur-md border-b border-slate-50 dark:border-slate-800 w-full shrink-0 z-30 transition-colors no-print sticky top-0">
     <div className="flex-1 flex items-center gap-4 max-w-[240px] md:max-w-md">
       <div className="lg:hidden flex items-center gap-2 cursor-pointer" onClick={() => onNavigate('landing')}>
         <div className="size-9 flex items-center justify-center bg-primary rounded-xl shadow-md shadow-primary/20">
@@ -187,7 +187,7 @@ const Header: React.FC<{
           placeholder="Search recipes..." 
           onChange={(e) => onSearch(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && onNavigate('recommendations')}
-          className="w-full pl-10 md:pl-12 pr-4 py-2.5 bg-white/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-primary/10 dark:text-white transition-all placeholder:text-slate-400"
+          className="w-full pl-10 md:pl-12 pr-4 py-2.5 bg-slate-100/50 dark:bg-slate-800 border-none rounded-2xl text-sm font-bold focus:ring-4 focus:ring-primary/10 dark:text-white transition-all placeholder:text-slate-400"
         />
       </div>
     </div>
@@ -195,7 +195,7 @@ const Header: React.FC<{
     <div className="flex items-center gap-3 md:gap-6">
       <button 
         onClick={toggleDarkMode}
-        className="size-10 md:size-12 flex items-center justify-center rounded-2xl bg-white/50 dark:bg-slate-800 text-slate-500 hover:bg-white transition-all active:scale-95 icon-button liquid-glass-white"
+        className="size-10 md:size-12 flex items-center justify-center rounded-2xl bg-slate-100/50 dark:bg-slate-800 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all active:scale-95 icon-button"
       >
         <span className="material-symbols-outlined text-[20px] md:text-[24px]">{isDarkMode ? 'light_mode' : 'dark_mode'}</span>
       </button>
@@ -203,7 +203,7 @@ const Header: React.FC<{
         <button className="text-sm font-black text-slate-900 dark:text-slate-300 hover:text-primary transition-colors px-4">Log In</button>
         <button 
           onClick={() => onNavigate('pantry')}
-          className="liquid-glass text-white text-sm font-black px-8 py-3 rounded-2xl active:scale-95 shadow-lg shadow-primary/20"
+          className="bg-primary text-white text-sm font-black px-8 py-3 rounded-2xl hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 active:scale-95"
         >
           Sign Up
         </button>
@@ -232,9 +232,17 @@ const Landing: React.FC<{
   };
 
   return (
-    <div className="flex-1 flex flex-col min-h-screen overflow-x-hidden relative no-scrollbar scroll-smooth">
+    <div className="flex-1 flex flex-col min-h-screen bg-mint-base dark:bg-slate-950 overflow-x-hidden relative no-scrollbar scroll-smooth">
+      {/* Background Theme Blobs */}
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-primary/15 rounded-full blur-[140px] animate-blob"></div>
+        <div className="absolute top-[20%] right-[-10%] w-[50%] h-[50%] bg-orange-500/10 rounded-full blur-[120px] animate-blob [animation-delay:2s]"></div>
+        <div className="absolute bottom-[-15%] left-[15%] w-[55%] h-[55%] bg-yellow-500/10 rounded-full blur-[160px] animate-blob [animation-delay:4s]"></div>
+        <div className="absolute bottom-[20%] right-[10%] w-[40%] h-[40%] bg-green-500/10 rounded-full blur-[100px] animate-blob [animation-delay:6s]"></div>
+      </div>
+
       {/* Landing Header */}
-      <header className="flex items-center justify-between px-4 sm:px-12 py-6 sticky top-0 bg-mint-base/80 dark:bg-slate-950/80 backdrop-blur-md z-[60] relative">
+      <header className="flex items-center justify-between px-4 sm:px-12 py-6 sticky top-0 bg-mint-base/90 dark:bg-slate-950/90 backdrop-blur-md z-[60] relative">
         <div className="flex items-center gap-3 cursor-pointer group" onClick={() => onNavigate('landing')}>
           <div className="size-10 flex items-center justify-center bg-primary rounded-xl group-hover:rotate-6 transition-transform shadow-lg shadow-primary/20">
             <span className="material-symbols-outlined !text-[24px] text-white font-black">nutrition</span>
@@ -334,7 +342,7 @@ const Landing: React.FC<{
       </section>
 
       {/* Trending Recipes */}
-      <section className="px-4 sm:px-12 py-32 bg-white/10 dark:bg-slate-900/10 backdrop-blur-md relative z-10">
+      <section className="px-4 sm:px-12 py-32 bg-slate-50/10 dark:bg-slate-900/10 backdrop-blur-md relative z-10">
         <div className="max-w-7xl mx-auto w-full">
           <div className="flex items-end justify-between mb-16">
             <div>
@@ -681,11 +689,11 @@ export default function App() {
           <div className="flex flex-col lg:flex-row flex-1 p-4 md:p-8 lg:p-12 gap-8 md:gap-12 relative z-10">
             <div className="flex-1 flex flex-col gap-8 md:gap-12">
               <div className="flex flex-col gap-4">
-                <h2 className="text-3xl md:text-5xl font-black text-gradient-mix mb-2">Welcome Back!</h2>
+                <h2 className="text-3xl md:text-4xl font-black text-slate-900 dark:text-white mb-2">Welcome Back!</h2>
                 <p className="text-slate-500 font-bold">Add ingredients to your pantry to get started.</p>
               </div>
 
-              <div className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-3xl rounded-[2.5rem] md:rounded-[3rem] shadow-2xl shadow-slate-200/50 dark:shadow-none p-3 md:p-4 flex flex-col md:flex-row items-center border border-white/50 dark:border-slate-800 transition-colors focus-within:ring-4 focus-within:ring-primary/10">
+              <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] md:rounded-[3rem] shadow-2xl shadow-slate-200/50 dark:shadow-none p-3 md:p-4 flex flex-col md:flex-row items-center border border-slate-100 dark:border-slate-800 transition-colors focus-within:ring-4 focus-within:ring-primary/10">
                 <div className="flex-[2] flex items-center">
                   <div className="pl-4 md:pl-6 text-slate-300">
                     <span className="material-symbols-outlined !text-[24px]">add_circle</span>
@@ -699,7 +707,7 @@ export default function App() {
                   />
                 </div>
                 
-                <div className="hidden md:block h-10 w-px bg-slate-200 dark:bg-slate-800 mx-4" />
+                <div className="hidden md:block h-10 w-px bg-slate-100 dark:bg-slate-800 mx-4" />
 
                 <div className="flex w-full md:w-auto items-center justify-between md:justify-start px-4 py-4 md:py-0 border-t md:border-t-0 border-slate-50 dark:border-slate-800 gap-4 md:gap-8">
                   <div className="flex items-center gap-3">
@@ -712,10 +720,10 @@ export default function App() {
                     />
                   </div>
 
-                  <div className="h-8 w-px bg-slate-200 dark:bg-slate-800 hidden md:block" />
+                  <div className="h-8 w-px bg-slate-100 dark:bg-slate-800 hidden md:block" />
 
                   <div className="relative">
-                    <div className="h-9 px-3 flex items-center gap-1 rounded-xl bg-white/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 group/unit transition-all hover:border-primary/20">
+                    <div className="h-9 px-3 flex items-center gap-1 rounded-xl bg-slate-50/50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 group/unit transition-all hover:border-primary/20">
                       <select 
                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                         value={inputUnit}
@@ -735,7 +743,7 @@ export default function App() {
 
                 <button 
                   onClick={() => handleAddIngredient(inputValue)} 
-                  className="w-full md:w-auto liquid-glass text-white font-black px-8 md:px-14 py-4 md:py-6 rounded-[1.8rem] md:rounded-[2rem] flex items-center justify-center gap-3 active:scale-95 shadow-xl shadow-primary/30 shrink-0 md:ml-4"
+                  className="w-full md:w-auto bg-primary text-white font-black px-8 md:px-14 py-4 md:py-6 rounded-[1.8rem] md:rounded-[2rem] flex items-center justify-center gap-3 hover:bg-primary-hover transition-all active:scale-95 shadow-xl shadow-primary/30 shrink-0 md:ml-4"
                 >
                   <span className="material-symbols-outlined text-[20px] md:text-[24px]">auto_awesome</span>
                   <span className="text-base md:text-lg">Add to Pantry</span>
@@ -755,7 +763,7 @@ export default function App() {
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 md:gap-6">
                   {(showAllStaples ? COMMON_STAPLES : COMMON_STAPLES.slice(0, 4)).map((staple) => (
-                    <button key={staple.name} onClick={() => handleAddIngredient(staple.name, 1, 'pcs')} className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-2xl rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-8 flex flex-col items-center gap-4 md:gap-6 border border-white/50 dark:border-slate-800 hover:shadow-2xl hover:shadow-slate-200/50 dark:hover:shadow-primary/5 transition-all group active:scale-95">
+                    <button key={staple.name} onClick={() => handleAddIngredient(staple.name, 1, 'pcs')} className="bg-white dark:bg-slate-900 rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-8 flex flex-col items-center gap-4 md:gap-6 border border-slate-50 dark:border-slate-800 hover:shadow-2xl hover:shadow-slate-200/50 dark:hover:shadow-primary/5 transition-all group active:scale-95">
                       <div className="size-12 md:size-16 rounded-2xl flex items-center justify-center transition-transform group-hover:rotate-12" style={{ backgroundColor: `${staple.color === 'orange' ? '#ff9800' : staple.color === 'blue' ? '#2196f3' : staple.color === 'red' ? '#f44336' : staple.color === 'yellow' ? '#ffeb3b' : staple.color === 'purple' ? '#9c27b0' : '#9e9e9e'}15` }}>
                         <span className="material-symbols-outlined text-[24px] md:text-[32px]" style={{color: staple.color}}>{staple.icon}</span>
                       </div>
@@ -767,7 +775,7 @@ export default function App() {
             </div>
 
             <div className="w-full lg:w-[420px] shrink-0 mb-24 lg:mb-0">
-              <div className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-3xl rounded-[2.5rem] md:rounded-[3.5rem] shadow-2xl shadow-slate-200/50 dark:shadow-none border border-white/50 dark:border-slate-800 flex flex-col h-full min-h-[500px] overflow-hidden transition-colors">
+              <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] md:rounded-[3.5rem] shadow-2xl shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-slate-800 flex flex-col h-full min-h-[500px] overflow-hidden transition-colors">
                 <div className="p-8 md:p-10 pb-6 flex items-center justify-between">
                   <div>
                     <h3 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white">My Pantry</h3>
@@ -776,7 +784,7 @@ export default function App() {
                       <p className="text-slate-400 dark:text-slate-500 text-[11px] font-black uppercase tracking-[0.2em]">{pantry.length} Active Items</p>
                     </div>
                   </div>
-                  <button onClick={() => setPantry([])} className="size-10 md:size-12 rounded-2xl bg-white/50 dark:bg-slate-800 flex items-center justify-center text-slate-400 hover:text-red-500 transition-all active:scale-90 icon-button liquid-glass-white">
+                  <button onClick={() => setPantry([])} className="size-10 md:size-12 rounded-2xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all active:scale-90 icon-button">
                     <span className="material-symbols-outlined text-[20px] md:text-[24px]">delete</span>
                   </button>
                 </div>
@@ -784,7 +792,7 @@ export default function App() {
                 <div className="p-8 md:p-10 flex-1 overflow-y-auto custom-scrollbar">
                   <div className="flex flex-col gap-4">
                     {pantry.map(item => (
-                      <div key={item.id} className="flex items-center justify-between p-4 md:p-5 bg-white/50 dark:bg-slate-800/50 rounded-3xl group border border-transparent hover:border-primary/10 transition-all">
+                      <div key={item.id} className="flex items-center justify-between p-4 md:p-5 bg-slate-50 dark:bg-slate-800/50 rounded-3xl group border border-transparent hover:border-primary/10 transition-all">
                         <div className="flex flex-col">
                           <div className="flex items-center gap-4">
                             <div className="size-8 md:size-10 rounded-xl bg-white dark:bg-slate-700 flex items-center justify-center shadow-sm">
@@ -811,11 +819,11 @@ export default function App() {
                   </div>
                 </div>
 
-                <div className="p-8 md:p-10 bg-white/20 dark:bg-slate-800/10 border-t border-white/50 dark:border-slate-800">
+                <div className="p-8 md:p-10 bg-slate-50/50 dark:bg-slate-800/10 border-t border-slate-50 dark:border-slate-800">
                   <button 
                     disabled={pantry.length === 0} 
                     onClick={generateAndSetRecipes} 
-                    className="w-full py-5 md:py-6 liquid-glass text-white rounded-[1.8rem] md:rounded-[2.2rem] font-black text-lg md:text-xl shadow-2xl shadow-primary/30 disabled:opacity-50 active:scale-[0.98] flex items-center justify-center gap-3"
+                    className="w-full py-5 md:py-6 bg-primary text-white rounded-[1.8rem] md:rounded-[2.2rem] font-black text-lg md:text-xl shadow-2xl shadow-primary/30 disabled:opacity-50 hover:bg-primary-hover transition-all active:scale-[0.98] flex items-center justify-center gap-3"
                   >
                     <span className="material-symbols-outlined font-black text-[24px] md:text-[28px]">flare</span>
                     What can I cook?
@@ -836,21 +844,21 @@ export default function App() {
                     <span className="material-symbols-outlined text-[14px]">bolt</span>
                     Daily Insight: Plan high protein lunches for active days
                   </div>
-                  <h1 className="text-4xl md:text-6xl font-black text-gradient-mix mb-3 tracking-tighter leading-none">Meal Planner</h1>
+                  <h1 className="text-4xl md:text-6xl font-black text-slate-900 dark:text-white mb-3 tracking-tighter leading-none">Meal Planner</h1>
                   <p className="text-slate-500 dark:text-slate-400 font-bold text-base md:text-xl max-w-2xl">Visualizing your kitchen workflow. Tap slots to assign or use shuffle modes for quick ideas.</p>
                 </div>
                 
                 <div className="flex flex-wrap gap-4 no-print">
                   <button 
                     onClick={() => setView('recommendations')}
-                    className="flex-1 sm:flex-none px-8 py-4 bg-white/40 dark:bg-slate-800/40 backdrop-blur-2xl text-slate-800 dark:text-slate-200 border border-white/50 dark:border-700 rounded-[1.5rem] font-black text-sm flex items-center justify-center gap-3 hover:bg-white transition-all active:scale-95"
+                    className="flex-1 sm:flex-none px-8 py-4 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-700 rounded-[1.5rem] font-black text-sm flex items-center justify-center gap-3 hover:bg-slate-50 transition-all active:scale-95"
                   >
                     <span className="material-symbols-outlined text-[20px]">explore</span>
                     Browse Feed
                   </button>
                   <button 
                     onClick={() => setView('shopping-list')}
-                    className="flex-1 sm:flex-none px-10 py-5 liquid-glass text-white rounded-[1.5rem] font-black text-base shadow-2xl shadow-primary/25 active:scale-95 flex items-center justify-center gap-4"
+                    className="flex-1 sm:flex-none px-10 py-5 bg-primary text-white rounded-[1.5rem] font-black text-base shadow-2xl shadow-primary/25 hover:bg-primary-hover transition-all active:scale-95 flex items-center justify-center gap-4"
                   >
                     <span className="material-symbols-outlined text-[24px]">shopping_cart_checkout</span>
                     Export Groceries
@@ -866,7 +874,7 @@ export default function App() {
                   return (
                     <div key={weekOffset} className="relative group max-w-[1084px] mx-auto w-full">
                       <div className="flex items-center justify-between mb-8 px-4">
-                        <h2 className="text-xl font-black text-slate-400 dark:text-slate-600 uppercase tracking-widest">
+                        <h2 className="text-xl font-black text-slate-300 dark:text-slate-600 uppercase tracking-widest">
                           {weekOffset === 0 ? "Current Week" : weekOffset === 1 ? "Next Week" : weekOffset === -1 ? "Last Week" : `Week Offset: ${weekOffset}`}
                         </h2>
                       </div>
@@ -899,8 +907,8 @@ export default function App() {
                           const macroType = totalCals > 1500 ? 'Active Day' : totalCals > 1000 ? 'Balanced' : 'Light';
 
                           return (
-                            <div key={dayKey} className={`w-[340px] shrink-0 snap-start flex flex-col h-full bg-white/40 dark:bg-slate-900/40 backdrop-blur-3xl p-8 md:p-12 rounded-[4rem] md:rounded-[5rem] border-2 transition-all ${isToday ? 'border-primary shadow-2xl shadow-primary/5' : 'border-white/50 dark:border-slate-800 shadow-sm'}`}>
-                              <div className="flex items-start justify-between mb-12 border-b border-slate-100 dark:border-slate-800 pb-8">
+                            <div key={dayKey} className={`w-[340px] shrink-0 snap-start flex flex-col h-full bg-white dark:bg-slate-900 p-8 md:p-12 rounded-[4rem] md:rounded-[5rem] border-2 transition-all ${isToday ? 'border-primary shadow-2xl shadow-primary/5' : 'border-slate-50 dark:border-slate-800 shadow-sm'}`}>
+                              <div className="flex items-start justify-between mb-12 border-b border-slate-50 dark:border-slate-800 pb-8">
                                 <div>
                                   <span className="text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.4em] mb-1 block">{dayKey.split(' ')[0]}</span>
                                   <div className="flex items-center gap-3">
@@ -910,10 +918,10 @@ export default function App() {
                                 </div>
                                 <div className="flex flex-col items-end gap-3">
                                   <div className="flex gap-2 no-print">
-                                    <button onClick={() => shuffleDayPlan(dayKey, 'balanced')} className="size-9 rounded-xl bg-white/60 dark:bg-slate-800 flex items-center justify-center text-slate-400 hover:text-primary transition-all icon-button" title="Shuffle Balanced">
+                                    <button onClick={() => shuffleDayPlan(dayKey, 'balanced')} className="size-9 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-400 hover:text-primary transition-all icon-button" title="Shuffle Balanced">
                                       <span className="material-symbols-outlined text-[18px]">shuffle</span>
                                     </button>
-                                    <button onClick={() => clearDayPlan(dayKey)} className="size-9 rounded-xl bg-white/60 dark:bg-slate-800 flex items-center justify-center text-slate-400 hover:text-red-500 transition-all icon-button" title="Reset Day">
+                                    <button onClick={() => clearDayPlan(dayKey)} className="size-9 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-400 hover:text-red-500 transition-all icon-button" title="Reset Day">
                                       <span className="material-symbols-outlined text-[18px]">delete_sweep</span>
                                     </button>
                                   </div>
@@ -931,15 +939,15 @@ export default function App() {
                                   const meal = dayMeals[slot];
                                   return (
                                     <div key={slot} className="flex-1 flex flex-col group/slot">
-                                      <span className="text-[10px] font-black text-slate-400 dark:text-slate-600 uppercase tracking-[0.2em] mb-3 px-1">{slot}</span>
+                                      <span className="text-[10px] font-black text-slate-300 dark:text-slate-600 uppercase tracking-[0.2em] mb-3 px-1">{slot}</span>
                                       {meal ? (
-                                        <div className="flex-1 bg-white/60 dark:bg-slate-800/50 rounded-[2.5rem] p-7 md:p-8 relative overflow-hidden flex items-center gap-6 group hover:shadow-xl hover:bg-white dark:hover:bg-slate-800 border border-white dark:border-slate-800 transition-all active:scale-[0.98]">
+                                        <div className="flex-1 bg-slate-50 dark:bg-slate-800/50 rounded-[2.5rem] p-7 md:p-8 relative overflow-hidden flex items-center gap-6 group hover:shadow-xl hover:bg-white dark:hover:bg-slate-800 border border-transparent hover:border-primary/20 transition-all active:scale-[0.98]">
                                           {meal.image && (
                                             <RecipeImage src={meal.image} alt={meal.title} className="size-16 md:size-24 rounded-2xl shrink-0" />
                                           )}
                                           <div className="flex-1">
                                             <h4 className="font-black text-slate-900 dark:text-white text-base md:text-xl leading-tight mb-2 pr-6 line-clamp-1">{meal.title}</h4>
-                                            <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 bg-white/80 dark:bg-slate-900 px-3 py-1 rounded-full border border-slate-100 dark:border-slate-800 uppercase tracking-widest">{meal.calories}</span>
+                                            <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 bg-white dark:bg-slate-900 px-3 py-1 rounded-full border border-slate-100 dark:border-slate-800 uppercase tracking-widest">{meal.calories}</span>
                                           </div>
                                           <button 
                                             onClick={() => setMealPlan(prev => ({ ...prev, [dayKey]: { ...prev[dayKey], [slot]: null } }))}
@@ -951,7 +959,7 @@ export default function App() {
                                       ) : (
                                         <button 
                                           onClick={() => addMealToPlan(dayKey, slot)}
-                                          className="flex-1 border-2 border-dashed border-white/80 dark:border-slate-800 rounded-[2.5rem] flex flex-col items-center justify-center gap-3 group hover:border-primary/40 hover:bg-white/40 dark:hover:bg-slate-800/30 transition-all active:scale-[0.98] py-10 relative no-print overflow-hidden"
+                                          className="flex-1 border-2 border-dashed border-slate-100 dark:border-slate-800 rounded-[2.5rem] flex flex-col items-center justify-center gap-3 group hover:border-primary/40 hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-all active:scale-[0.98] py-10 relative no-print overflow-hidden"
                                         >
                                           <div className="flex items-center gap-3">
                                              <span className="material-symbols-outlined text-[24px] text-slate-200 group-hover:text-primary transition-colors">add_circle</span>
@@ -1011,20 +1019,20 @@ export default function App() {
           <section className="p-4 md:p-8 lg:p-12 w-full animate-in fade-in slide-in-from-bottom-6 duration-500 overflow-y-auto max-w-6xl mx-auto mb-24 md:mb-0 relative z-10">
             <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-12 md:mb-16 gap-8 no-print">
               <div>
-                <h1 className="text-4xl md:text-6xl font-black text-gradient-mix mb-3 tracking-tighter">Grocery List</h1>
+                <h1 className="text-4xl md:text-6xl font-black text-slate-900 dark:text-white mb-3 tracking-tighter">Grocery List</h1>
                 <p className="text-slate-400 font-bold text-base md:text-xl">Everything you need for a delicious week.</p>
               </div>
               <div className="flex gap-3 md:gap-4">
                 <button 
                   onClick={clearCompletedGroceries}
-                  className="flex-1 sm:flex-none px-6 md:px-8 py-4 bg-white/60 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-2xl md:rounded-[1.8rem] font-black border border-white/50 dark:border-slate-700 text-xs md:text-sm transition-all flex items-center justify-center gap-3 hover:bg-white active:scale-95"
+                  className="flex-1 sm:flex-none px-6 md:px-8 py-4 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-2xl md:rounded-[1.8rem] font-black border border-slate-100 dark:border-slate-700 text-xs md:text-sm transition-all flex items-center justify-center gap-3 hover:bg-slate-50 active:scale-95"
                 >
                   <span className="material-symbols-outlined text-[20px] md:text-[24px]">delete_sweep</span> 
                   Clear Done
                 </button>
                 <button 
                   onClick={() => window.print()}
-                  className="flex-1 sm:flex-none px-6 md:px-8 py-4 liquid-glass text-white rounded-2xl md:rounded-[1.8rem] font-black text-xs md:text-sm active:scale-95 shadow-xl"
+                  className="flex-1 sm:flex-none px-6 md:px-8 py-4 bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 rounded-2xl md:rounded-[1.8rem] font-black text-xs md:text-sm transition-all flex items-center justify-center gap-3 hover:opacity-90 active:scale-95 shadow-xl"
                 >
                   <span className="material-symbols-outlined text-[20px] md:text-[24px]">print</span> 
                   Print List
@@ -1033,19 +1041,19 @@ export default function App() {
             </div>
 
             <div className="mb-12 md:mb-16 no-print">
-              <div className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-3xl p-2 md:p-3 rounded-[1.8rem] md:rounded-[2.5rem] shadow-2xl shadow-slate-200/50 dark:shadow-none border border-white/50 dark:border-slate-800 flex items-center transition-all focus-within:ring-8 focus-within:ring-primary/5">
-                <span className="material-symbols-outlined ml-4 md:ml-8 text-slate-400 !text-[24px] md:!text-[32px]">shopping_cart</span>
+              <div className="bg-white dark:bg-slate-900 p-2 md:p-3 rounded-[1.8rem] md:rounded-[2.5rem] shadow-2xl shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-slate-800 flex items-center transition-all focus-within:ring-8 focus-within:ring-primary/5">
+                <span className="material-symbols-outlined ml-4 md:ml-8 text-slate-300 !text-[24px] md:!text-[32px]">shopping_cart</span>
                 <input 
                   type="text" 
                   value={groceryInput}
                   onChange={(e) => setGroceryInput(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleAddGrocery()}
                   placeholder="What else do you need?" 
-                  className="flex-1 bg-transparent border-none focus:ring-0 text-lg md:text-2xl font-black px-4 md:px-6 dark:text-white placeholder:text-slate-300"
+                  className="flex-1 bg-transparent border-none focus:ring-0 text-lg md:text-2xl font-black px-4 md:px-6 dark:text-white placeholder:text-slate-200"
                 />
                 <button 
                   onClick={handleAddGrocery}
-                  className="liquid-glass text-white font-black px-6 md:px-12 py-4 md:py-6 rounded-[1.4rem] md:rounded-[2rem] active:scale-95 text-sm md:text-xl shadow-lg shadow-primary/20"
+                  className="bg-primary text-white font-black px-6 md:px-12 py-4 md:py-6 rounded-[1.4rem] md:rounded-[2rem] hover:bg-primary-hover transition-all active:scale-95 text-sm md:text-xl shadow-lg shadow-primary/20"
                 >
                   Add Item
                 </button>
@@ -1054,8 +1062,8 @@ export default function App() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10 pb-16">
               {categories.map((cat, i) => (
-                <div key={i} className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-3xl p-8 md:p-12 rounded-[3rem] md:rounded-[4rem] border border-white/50 dark:border-slate-800 transition-all hover:shadow-2xl hover:shadow-slate-100 dark:hover:shadow-none">
-                  <div className="flex items-center gap-4 md:gap-6 mb-8 md:mb-12 border-b border-slate-100 dark:border-slate-800 pb-6 md:pb-8">
+                <div key={i} className="bg-white dark:bg-slate-900 p-8 md:p-12 rounded-[3rem] md:rounded-[4rem] border border-slate-100 dark:border-slate-800 transition-all hover:shadow-2xl hover:shadow-slate-100 dark:hover:shadow-none">
+                  <div className="flex items-center gap-4 md:gap-6 mb-8 md:mb-12 border-b border-slate-50 dark:border-slate-800 pb-6 md:pb-8">
                     <div className="size-12 md:size-16 rounded-[1.5rem] bg-primary/10 flex items-center justify-center text-primary">
                       <span className="material-symbols-outlined font-black text-[28px] md:text-[36px]">{categoryIcons[cat] || 'category'}</span>
                     </div>
@@ -1071,8 +1079,8 @@ export default function App() {
                         key={item.id} 
                         className={`flex items-center gap-4 md:gap-6 p-4 md:p-6 rounded-[1.8rem] md:rounded-[2rem] transition-all cursor-pointer select-none group/item border border-transparent ${
                           item.completed 
-                            ? 'bg-white/20 dark:bg-slate-800/20 grayscale opacity-60' 
-                            : 'bg-white/60 dark:bg-slate-900/60 border-white/50 dark:border-slate-800 hover:border-primary/20 hover:shadow-lg'
+                            ? 'bg-slate-50/50 dark:bg-slate-800/30 grayscale opacity-60' 
+                            : 'bg-white dark:bg-slate-900 border-slate-50 dark:border-slate-800 hover:border-primary/20 hover:shadow-lg'
                         }`}
                         onClick={() => toggleGrocery(item.id)}
                       >
@@ -1080,7 +1088,7 @@ export default function App() {
                           <div className={`size-full rounded-xl md:rounded-2xl border-2 md:border-[3px] transition-all flex items-center justify-center ${
                             item.completed 
                               ? 'bg-primary border-primary' 
-                              : 'border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800'
+                              : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800'
                           }`}>
                             <span className={`material-symbols-outlined text-white text-sm md:text-xl font-black transition-all duration-300 ${
                               item.completed ? 'scale-100 opacity-100' : 'scale-50 opacity-0'
@@ -1107,7 +1115,7 @@ export default function App() {
 
                         <button 
                           onClick={(e) => { e.stopPropagation(); deleteGrocery(item.id); }}
-                          className="size-10 md:size-12 rounded-2xl flex items-center justify-center text-slate-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 md:opacity-0 group-hover/item:opacity-100 transition-all no-print active:scale-90 icon-button"
+                          className="size-10 md:size-12 rounded-2xl flex items-center justify-center text-slate-200 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 md:opacity-0 group-hover/item:opacity-100 transition-all no-print active:scale-90 icon-button"
                         >
                           <span className="material-symbols-outlined text-[20px] md:text-[24px]">close</span>
                         </button>
@@ -1132,24 +1140,24 @@ export default function App() {
         return (
           <section className="p-4 md:p-8 lg:p-12 w-full animate-in fade-in slide-in-from-bottom-8 duration-500 overflow-y-auto mb-24 md:mb-0 relative z-10">
             <div className="mb-10 md:mb-16">
-              <h1 className="text-4xl md:text-6xl font-black text-gradient-mix mb-3 tracking-tighter">Chef's Feed</h1>
+              <h1 className="text-4xl md:text-6xl font-black text-slate-900 dark:text-white mb-3 tracking-tighter">Chef's Feed</h1>
               <p className="text-slate-500 dark:text-slate-400 font-bold text-base md:text-xl">Crafted based on your current pantry.</p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8 md:gap-12 pb-16">
               {filteredRecommendations.map(recipe => (
-                <div key={recipe.id} onClick={() => { setSelectedRecipe(recipe); setView('recipe-details'); }} className="cursor-pointer group bg-white/40 dark:bg-slate-900/40 backdrop-blur-3xl rounded-[2.5rem] md:rounded-[3.5rem] overflow-hidden shadow-sm hover:shadow-2xl dark:hover:shadow-primary/5 transition-all border border-white/50 dark:border-slate-800 flex flex-col active:scale-[0.98]">
+                <div key={recipe.id} onClick={() => { setSelectedRecipe(recipe); setView('recipe-details'); }} className="cursor-pointer group bg-white dark:bg-slate-900 rounded-[2.5rem] md:rounded-[3.5rem] overflow-hidden shadow-sm hover:shadow-2xl dark:hover:shadow-primary/5 transition-all border border-slate-100 dark:border-slate-800 flex flex-col active:scale-[0.98]">
                   <RecipeImage src={recipe.image} alt={recipe.title} className="aspect-[4/3] group-hover:scale-105 transition-transform duration-700" />
                   <div className="p-8 md:p-10">
                     <div className="flex items-center justify-between mb-5 md:mb-6">
-                      <span className="px-3 md:px-4 py-1.5 bg-white/60 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-[10px] md:text-[11px] font-black uppercase rounded-full tracking-widest">{recipe.difficulty}</span>
+                      <span className="px-3 md:px-4 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-[10px] md:text-[11px] font-black uppercase rounded-full tracking-widest">{recipe.difficulty}</span>
                       <div className="flex items-center gap-1.5 text-primary">
                         <span className="material-symbols-outlined text-[16px] md:text-[20px] fill-1">star</span>
                         <span className="text-sm md:text-base font-black">{recipe.matchPercentage}% match</span>
                       </div>
                     </div>
-                    <h3 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white mb-3 md:mb-4 group-hover:text-primary transition-colors leading-tight tracking-tight font-aesthetic">{recipe.title}</h3>
-                    <p className="text-slate-500 dark:text-slate-400 font-bold text-sm md:text-base leading-relaxed mb-6 md:mb-8 line-clamp-2">{recipe.description}</p>
-                    <div className="flex items-center gap-6 md:gap-10 text-[11px] md:text-[13px] font-black text-slate-400 dark:text-slate-600 uppercase tracking-widest">
+                    <h3 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white mb-3 md:mb-4 group-hover:text-primary transition-colors leading-tight tracking-tight">{recipe.title}</h3>
+                    <p className="text-slate-400 dark:text-slate-500 font-bold text-sm md:text-base leading-relaxed mb-6 md:mb-8 line-clamp-2">{recipe.description}</p>
+                    <div className="flex items-center gap-6 md:gap-10 text-[11px] md:text-[13px] font-black text-slate-300 dark:text-slate-600 uppercase tracking-widest">
                       <div className="flex items-center gap-2 md:gap-3"><span className="material-symbols-outlined text-[20px] md:text-[24px]">timer</span>{recipe.cookTime}</div>
                       <div className="flex items-center gap-2 md:gap-3"><span className="material-symbols-outlined text-[20px] md:text-[24px]">group</span>{recipe.servings} Serves</div>
                     </div>
@@ -1164,29 +1172,29 @@ export default function App() {
         if (!selectedRecipe) return null;
         return (
           <main className="w-full max-w-5xl mx-auto p-4 md:p-8 lg:p-12 animate-in fade-in duration-500 overflow-y-auto mb-24 md:mb-0 relative z-10">
-            <button onClick={() => setView('recommendations')} className="flex items-center gap-3 font-black text-slate-400 hover:text-primary transition-all mb-8 md:mb-14 text-base md:text-lg group">
+            <button onClick={() => setView('recommendations')} className="flex items-center gap-3 font-black text-slate-300 hover:text-primary transition-all mb-8 md:mb-14 text-base md:text-lg group">
               <span className="material-symbols-outlined text-[20px] md:text-[24px] group-hover:-translate-x-2 transition-transform">arrow_back</span> 
               Back to feed
             </button>
             
             <div className="flex flex-col gap-10 md:gap-16 pb-16 md:pb-32">
               <div className="flex flex-col gap-6">
-                <h1 className="text-4xl md:text-6xl lg:text-7xl font-black text-gradient-mix leading-[1.1] tracking-tighter">{selectedRecipe.title}</h1>
+                <h1 className="text-4xl md:text-6xl lg:text-7xl font-black text-slate-900 dark:text-white leading-[1.1] tracking-tighter">{selectedRecipe.title}</h1>
                 <div className="flex flex-wrap items-center gap-3 md:gap-4 mt-2">
                   <div className="flex items-center gap-2 md:gap-2.5 px-4 md:px-6 py-2 md:py-3 bg-primary/10 text-primary font-black text-xs md:text-base rounded-full border border-primary/20">
                     <span className="material-symbols-outlined text-[18px] md:text-[24px]">local_fire_department</span>
                     {selectedRecipe.calories}
                   </div>
-                  <div className="flex items-center gap-2 md:gap-2.5 px-4 md:px-6 py-2 md:py-3 bg-white/60 dark:bg-slate-800 text-slate-500 dark:text-slate-300 font-black text-xs md:text-base rounded-full">
+                  <div className="flex items-center gap-2 md:gap-2.5 px-4 md:px-6 py-2 md:py-3 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-300 font-black text-xs md:text-base rounded-full">
                     <span className="material-symbols-outlined text-[18px] md:text-[24px]">schedule</span>
                     {selectedRecipe.cookTime}
                   </div>
-                  <div className="flex items-center gap-2 md:gap-2.5 px-4 md:px-6 py-2 md:py-3 bg-white/60 dark:bg-slate-800 text-slate-500 dark:text-slate-300 font-black text-xs md:text-base rounded-full">
+                  <div className="flex items-center gap-2 md:gap-2.5 px-4 md:px-6 py-2 md:py-3 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-300 font-black text-xs md:text-base rounded-full">
                     <span className="material-symbols-outlined text-[18px] md:text-[24px]">group</span>
                     {selectedRecipe.servings} Servings
                   </div>
                 </div>
-                <p className="text-lg md:text-2xl font-bold text-slate-500 dark:text-slate-400 leading-relaxed max-w-4xl mt-4 font-aesthetic">{selectedRecipe.description}</p>
+                <p className="text-lg md:text-2xl font-bold text-slate-400 dark:text-slate-500 leading-relaxed max-w-4xl mt-4">{selectedRecipe.description}</p>
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 md:gap-14 items-start">
@@ -1194,14 +1202,14 @@ export default function App() {
                   <RecipeImage src={selectedRecipe.image} alt={selectedRecipe.title} className="w-full h-full rounded-[3rem] md:rounded-[4rem] shadow-2xl shadow-slate-200/50 dark:shadow-none object-cover border-4 border-white dark:border-slate-800" />
                 </div>
                 
-                <div className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-3xl p-8 md:p-12 rounded-[3rem] md:rounded-[4rem] border border-white/50 dark:border-slate-800 shadow-sm transition-all hover:border-primary/20">
+                <div className="bg-white dark:bg-slate-900 p-8 md:p-12 rounded-[3rem] md:rounded-[4rem] border border-slate-50 dark:border-slate-800 shadow-sm transition-all hover:border-primary/20">
                   <h3 className="text-3xl md:text-4xl font-black mb-10 text-slate-900 dark:text-white tracking-tight">Ingredients</h3>
                   <div className="flex flex-col gap-6 md:gap-8">
                     {selectedRecipe.ingredients.map((ing, i) => (
                       <div key={i} className="flex justify-between items-center group/ing">
                         <span className="text-lg md:text-xl font-black text-slate-900 dark:text-white group-hover/ing:text-primary transition-colors">{ing.name}</span>
                         <div className="flex items-center gap-4 flex-1 px-4">
-                           <div className="h-px w-full bg-slate-200 dark:bg-slate-800 group-hover/ing:bg-primary/20 transition-all"></div>
+                           <div className="h-px w-full bg-slate-100 dark:bg-slate-800 group-hover/ing:bg-primary/20 transition-all"></div>
                         </div>
                         <span className="text-primary text-lg md:text-xl font-black shrink-0">{ing.amount}</span>
                       </div>
@@ -1210,25 +1218,25 @@ export default function App() {
                 </div>
               </div>
 
-              <div className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-3xl p-8 md:p-12 rounded-[3rem] border border-white/50 dark:border-slate-800">
+              <div className="bg-white dark:bg-slate-900 p-8 md:p-12 rounded-[3rem] border border-slate-50 dark:border-slate-800">
                  <div className="flex items-center gap-4 mb-10">
                     <div className="size-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
                        <span className="material-symbols-outlined">bar_chart</span>
                     </div>
-                    <h3 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Dietary Analysis</h3>
+                    <h3 className="text-3xl font-black text-slate-900 dark:text-white">Dietary Analysis</h3>
                  </div>
                  <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
                     {[
                       { label: 'Protein', value: selectedRecipe.nutrition.protein, color: 'bg-primary' },
-                      { label: 'Carbohydrates', value: selectedRecipe.nutrition.carbs, color: 'bg-orange-500' },
-                      { label: 'Healthy Fats', value: selectedRecipe.nutrition.fats, color: 'bg-yellow-500' }
+                      { label: 'Carbohydrates', value: selectedRecipe.nutrition.carbs, color: 'bg-blue-500' },
+                      { label: 'Healthy Fats', value: selectedRecipe.nutrition.fats, color: 'bg-orange-500' }
                     ].map((macro) => (
                       <div key={macro.label} className="flex flex-col gap-4">
                         <div>
                            <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">{macro.label}</span>
                            <h4 className="text-4xl font-black text-slate-900 dark:text-white mt-1">{macro.value}</h4>
                         </div>
-                        <div className="h-2 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+                        <div className="h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
                            <div className={`h-full ${macro.color} rounded-full`} style={{ width: '70%' }}></div>
                         </div>
                       </div>
@@ -1268,15 +1276,7 @@ export default function App() {
   };
 
   return (
-    <div className={`min-h-screen flex flex-col lg:flex-row transition-colors relative ${isDarkMode ? 'bg-[#0a0f0b]' : 'bg-mint-base'}`}>
-      {/* PERSISTENT GLOBAL BACKGROUND BLOBS */}
-      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-        <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-primary/15 rounded-full blur-[140px] animate-blob"></div>
-        <div className="absolute top-[20%] right-[-10%] w-[50%] h-[50%] bg-orange-500/10 rounded-full blur-[120px] animate-blob [animation-delay:2s]"></div>
-        <div className="absolute bottom-[-15%] left-[15%] w-[55%] h-[55%] bg-yellow-500/10 rounded-full blur-[160px] animate-blob [animation-delay:4s]"></div>
-        <div className="absolute bottom-[20%] right-[10%] w-[40%] h-[40%] bg-green-500/10 rounded-full blur-[100px] animate-blob [animation-delay:6s]"></div>
-      </div>
-
+    <div className={`min-h-screen flex flex-col lg:flex-row transition-colors ${isDarkMode ? 'bg-[#0a0f0b]' : 'bg-[#F9FCFA]'}`}>
       {view === 'landing' ? renderContent() : (
         <>
           <Sidebar currentView={view} onNavigate={setView} />
