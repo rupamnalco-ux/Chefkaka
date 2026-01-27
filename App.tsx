@@ -83,7 +83,7 @@ const RecipeImage: React.FC<{ src: string; alt: string; className?: string }> = 
 const Sidebar: React.FC<{ currentView: ViewState; onNavigate: (view: ViewState) => void }> = ({ currentView, onNavigate }) => (
   <aside className="hidden lg:flex w-72 shrink-0 flex-col h-screen sticky top-0 bg-white dark:bg-slate-900 border-r border-slate-100 dark:border-slate-800 p-8 z-40 transition-colors no-print">
     <div className="flex items-center gap-3 mb-12 px-2 cursor-pointer group" onClick={() => onNavigate('landing')}>
-      <div className="size-10 flex items-center justify-center bg-primary rounded-2xl group-hover:rotate-6 transition-transform shadow-lg shadow-primary/20">
+      <div className="size-10 flex items-center justify-center bg-primary rounded-xl group-hover:rotate-6 transition-transform shadow-lg shadow-primary/20">
         <span className="material-symbols-outlined !text-[24px] text-white font-black">nutrition</span>
       </div>
       <h2 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white font-aesthetic">ChefMistri</h2>
@@ -262,11 +262,11 @@ const Landing: React.FC<{
           </button>
         </div>
 
-        {/* Hero Card Container - Fixed to prevent collapse */}
-        <div className="w-full max-w-6xl relative group mt-0 lg:-mt-20 px-4 z-10 min-h-[300px] md:min-h-[500px]">
+        {/* Hero Card Container - Spacing adjusted to fix overlap as requested */}
+        <div className="w-full max-w-6xl relative group mt-12 md:mt-16 lg:mt-24 px-4 z-10 min-h-[300px] md:min-h-[500px]">
            <div className="absolute inset-0 bg-primary/10 blur-[120px] rounded-full scale-75 translate-y-20 opacity-40"></div>
            <TiltedCard
-              imageSrc="https://images.unsplash.com/photo-1626700051175-6818013e1d4f?q=80&w=1200"
+              imageSrc="https://images.pexels.com/photos/12362926/pexels-photo-12362926.jpeg"
               altText="Gourmet Takeout Feast"
               captionText="The Ultimate Platter"
               containerHeight="100%"
