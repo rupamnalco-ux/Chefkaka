@@ -1,7 +1,18 @@
+
 declare global {
   namespace NodeJS {
     interface ProcessEnv {
       API_KEY: string;
+    }
+  }
+
+  /* 
+   * Augmented JSX namespace to include 'iconify-icon' custom element.
+   * This resolves the 'Property does not exist on type JSX.IntrinsicElements' error.
+   */
+  namespace JSX {
+    interface IntrinsicElements {
+      'iconify-icon': any;
     }
   }
 }

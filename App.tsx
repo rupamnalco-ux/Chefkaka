@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   ViewState, 
@@ -14,6 +15,7 @@ import {
 import { 
   generateRecipesFromPantry 
 } from './geminiService.ts';
+import TiltedCard from './TiltedCard.tsx';
 
 const UNIT_OPTIONS = ['pcs', 'g', 'kg', 'ml', 'l', 'cup', 'tbsp', 'tsp', 'oz', 'lb'];
 
@@ -24,6 +26,24 @@ interface ShoppingItem {
   completed: boolean;
   amount?: string;
 }
+
+const TRENDING_SETS = [
+  {
+    large: { title: "Mediterranean Quinoa Bowl", time: "15 mins", diff: "Easy", img: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?q=80&w=1200" },
+    small1: { title: "Zesty Lemon Salmon", time: "25 mins", diff: "Medium", img: "https://images.unsplash.com/photo-1467003909585-2f8a72700288?q=80&w=800" },
+    small2: { title: "Avocado Toast with Egg", time: "10 mins", diff: "Easy", img: "https://images.unsplash.com/photo-1525351484163-7529414344d8?q=80&w=800" }
+  },
+  {
+    large: { title: "Spicy Ahi Tuna Poke", time: "20 mins", diff: "Medium", img: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=1200" },
+    small1: { title: "Garlic Butter Shrimp", time: "15 mins", diff: "Easy", img: "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?q=80&w=800" },
+    small2: { title: "Wild Mushroom Risotto", time: "35 mins", diff: "Hard", img: "https://images.unsplash.com/photo-1476124369491-e7addf5db371?q=80&w=800" }
+  },
+  {
+    large: { title: "Garden Fresh Pesto Pasta", time: "25 mins", diff: "Easy", img: "https://images.unsplash.com/photo-1473093226795-af9932fe5855?q=80&w=1200" },
+    small1: { title: "Honey Glazed Carrots", time: "20 mins", diff: "Easy", img: "https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?q=80&w=800" },
+    small2: { title: "Steak and Asparagus", time: "30 mins", diff: "Medium", img: "https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=800" }
+  }
+];
 
 const RecipeImage: React.FC<{ src: string; alt: string; className?: string }> = ({ src, alt, className }) => {
   const [hasError, setHasError] = useState(false);
@@ -66,7 +86,7 @@ const Sidebar: React.FC<{ currentView: ViewState; onNavigate: (view: ViewState) 
       <div className="size-10 flex items-center justify-center bg-primary rounded-2xl group-hover:rotate-6 transition-transform shadow-lg shadow-primary/20">
         <span className="material-symbols-outlined !text-[24px] text-white font-black">nutrition</span>
       </div>
-      <h2 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white">ChefMistri</h2>
+      <h2 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white font-aesthetic">ChefMistri</h2>
     </div>
 
     <div className="flex flex-col gap-2">
@@ -179,171 +199,251 @@ const Landing: React.FC<{
   isDarkMode: boolean;
   toggleDarkMode: () => void;
 }> = ({ onNavigate, isDarkMode, toggleDarkMode }) => {
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const [trendingIndex, setTrendingIndex] = useState(0);
 
-  const trendingRecipes = [
-    { title: "Mediterranean Quinoa Bowl", time: "15 mins", diff: "Easy", popular: true, img: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?q=80&w=800&auto=format&fit=crop" },
-    { title: "Zesty Lemon Salmon", time: "25 mins", diff: "Medium", popular: false, img: "https://images.unsplash.com/photo-1467003909585-2f8a72700288?q=80&w=800&auto=format&fit=crop" },
-    { title: "Avocado Toast with Egg", time: "10 mins", diff: "Easy", popular: false, img: "https://images.unsplash.com/photo-1525351484163-7529414344d8?q=80&w=800&auto=format&fit=crop" },
-    { title: "Chicken Teriyaki Bowl", time: "30 mins", diff: "Medium", popular: true, img: "https://images.unsplash.com/photo-1526318896980-cf78c088247c?q=80&w=800&auto=format&fit=crop" },
-    { title: "Pesto Pasta", time: "15 mins", diff: "Easy", popular: false, img: "https://images.unsplash.com/photo-1473093226795-af9932fe5856?q=80&w=800&auto=format&fit=crop" },
-    { title: "Veggie Burrito Bowl", time: "20 mins", diff: "Easy", popular: false, img: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?q=80&w=800&auto=format&fit=crop" },
-    { title: "Mushroom Risotto", time: "40 mins", diff: "Hard", popular: false, img: "https://images.unsplash.com/photo-1476124369491-e7addf5db371?q=80&w=800&auto=format&fit=crop" },
-    { title: "Tuna Poke Bowl", time: "15 mins", diff: "Easy", popular: true, img: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=800&auto=format&fit=crop" },
-    { title: "Lentil Power Salad", time: "20 mins", diff: "Easy", popular: false, img: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?q=80&w=800&auto=format&fit=crop" },
-    { title: "Chickpea Curry", time: "35 mins", diff: "Medium", popular: false, img: "https://images.unsplash.com/photo-1585937421612-70a008356fbe?q=80&w=800&auto=format&fit=crop" }
-  ];
+  const nextTrending = () => setTrendingIndex((prev) => (prev + 1) % TRENDING_SETS.length);
+  const prevTrending = () => setTrendingIndex((prev) => (prev - 1 + TRENDING_SETS.length) % TRENDING_SETS.length);
 
-  const scroll = (direction: 'left' | 'right') => {
-    if (scrollRef.current) {
-      const { scrollLeft, clientWidth } = scrollRef.current;
-      const scrollTo = direction === 'left' ? scrollLeft - clientWidth : scrollLeft + clientWidth;
-      scrollRef.current.scrollTo({ left: scrollTo, behavior: 'smooth' });
-    }
-  };
+  const currentSet = TRENDING_SETS[trendingIndex];
 
   return (
-    <div className="flex-1 flex flex-col min-h-screen bg-white dark:bg-slate-950 overflow-y-auto no-scrollbar">
+    <div className="flex-1 flex flex-col min-h-screen bg-white dark:bg-slate-950 overflow-y-auto no-scrollbar scroll-smooth">
       {/* Landing Header */}
-      <header className="flex items-center justify-between px-6 md:px-12 py-6 sticky top-0 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md z-[60]">
+      <header className="flex items-center justify-between px-4 sm:px-12 py-6 sticky top-0 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md z-[60]">
         <div className="flex items-center gap-3 cursor-pointer group" onClick={() => onNavigate('landing')}>
-          <div className="size-8 flex items-center justify-center bg-primary rounded-xl group-hover:rotate-6 transition-transform shadow-lg shadow-primary/20">
-            <span className="material-symbols-outlined !text-[18px] text-white font-black">nutrition</span>
+          <div className="size-10 flex items-center justify-center bg-primary rounded-xl group-hover:rotate-6 transition-transform shadow-lg shadow-primary/20">
+            <span className="material-symbols-outlined !text-[24px] text-white font-black">nutrition</span>
           </div>
-          <h1 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">ChefMistri</h1>
+          <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tighter font-aesthetic">ChefMistri</h1>
         </div>
         
-        <nav className="hidden md:flex items-center gap-8">
+        <nav className="hidden lg:flex items-center gap-12 font-aesthetic">
           {['Features', 'Recipes', 'Pricing'].map(link => (
-            <button key={link} onClick={() => onNavigate('landing')} className="text-sm font-bold text-slate-500 dark:text-slate-400 hover:text-primary transition-colors">{link}</button>
+            <button key={link} className="text-[13px] font-semibold uppercase tracking-[0.1em] text-slate-600 dark:text-slate-400 hover:text-primary transition-all duration-300">{link}</button>
           ))}
         </nav>
 
         <div className="flex items-center gap-4">
           <button onClick={toggleDarkMode} className="size-10 flex items-center justify-center rounded-xl bg-slate-50 dark:bg-slate-900 text-slate-500 transition-all active:scale-95 icon-button yellow-glow-button">
-            <span className="material-symbols-outlined">{isDarkMode ? 'light_mode' : 'dark_mode'}</span>
+            <span className="material-symbols-outlined !text-[24px]">{isDarkMode ? 'light_mode' : 'dark_mode'}</span>
           </button>
-          <button onClick={() => onNavigate('pantry')} className="text-sm font-bold text-slate-600 dark:text-slate-300 hover:text-primary transition-colors px-4">Login</button>
-          <button onClick={() => onNavigate('pantry')} className="px-6 py-2.5 bg-primary text-white text-sm font-black rounded-xl hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 active:scale-95">Sign Up</button>
+          <button onClick={() => onNavigate('pantry')} className="hidden sm:block text-[13px] font-bold uppercase tracking-wide text-slate-600 dark:text-slate-300 hover:text-primary transition-colors px-4 font-aesthetic">Login</button>
+          <button onClick={() => onNavigate('pantry')} className="px-8 py-3 bg-primary text-white text-[13px] font-black uppercase tracking-wider rounded-xl hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 active:scale-95 font-aesthetic">Sign Up</button>
         </div>
       </header>
 
       {/* Hero Section */}
-      <section className="relative px-6 md:px-12 py-12 lg:py-24 flex flex-col items-center">
-        <div className="max-w-7xl w-full relative rounded-[3rem] md:rounded-[4.5rem] overflow-hidden aspect-[16/9] md:aspect-[21/9] flex items-center justify-center">
-          <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=2000&auto=format&fit=crop" alt="Food bowl" className="absolute inset-0 w-full h-full object-cover scale-105" />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/60"></div>
-          
-          <div className="relative z-10 text-center flex flex-col items-center max-w-4xl px-6">
-            <h2 className="text-4xl md:text-7xl font-black text-white mb-6 tracking-tighter leading-none">Cook Smarter, Not Harder</h2>
-            <p className="text-lg md:text-2xl text-white/90 font-medium mb-10 leading-relaxed">Turn your pantry into delicious meals with AI-powered recipe discovery and smart management.</p>
-            <div className="flex flex-wrap items-center justify-center gap-4 md:gap-6">
-              <button onClick={() => onNavigate('pantry')} className="px-10 py-5 bg-primary text-white text-lg font-black rounded-[1.8rem] hover:bg-primary-hover transition-all shadow-2xl shadow-primary/40 active:scale-95">Get Started for Free</button>
-              <button onClick={() => onNavigate('landing')} className="px-10 py-5 bg-white/10 backdrop-blur-md text-white border border-white/20 text-lg font-black rounded-[1.8rem] hover:bg-white/20 transition-all flex items-center gap-3 active:scale-95">
-                <span className="material-symbols-outlined fill-1">play_circle</span>
-                Watch Demo
-              </button>
-            </div>
-          </div>
+      <section className="relative px-4 sm:px-12 py-16 flex flex-col items-center">
+        <div className="mb-8">
+           <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary/10 text-primary rounded-full text-[10px] font-black uppercase tracking-widest border border-primary/20 font-aesthetic">
+              <span className="w-1.5 h-1.5 rounded-full bg-primary"></span>
+              The future of kitchens
+           </span>
+        </div>
+        
+        <div className="text-center max-w-4xl mb-12">
+          <h2 className="text-5xl sm:text-7xl lg:text-8xl font-black text-slate-900 dark:text-white mb-6 tracking-tighter leading-[1.05] font-aesthetic">
+             Cook Smarter, <br/>
+             <span className="text-primary">Not Harder</span>
+          </h2>
+          <p className="text-lg sm:text-xl text-slate-500 dark:text-slate-400 font-medium leading-relaxed max-w-2xl mx-auto font-aesthetic">
+            Turn your pantry into delicious meals with AI-powered recipe discovery and precision kitchen management.
+          </p>
+        </div>
+
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto mb-20 font-aesthetic">
+          <button onClick={() => onNavigate('pantry')} className="w-full sm:w-auto px-10 py-5 bg-primary text-white text-lg font-bold rounded-2xl hover:bg-primary-hover transition-all shadow-xl shadow-primary/20 flex items-center justify-center gap-3 active:scale-95">
+            Get Started Free
+            <span className="material-symbols-outlined !text-[20px]">arrow_forward</span>
+          </button>
+          <button className="w-full sm:w-auto px-10 py-5 bg-white dark:bg-slate-900 text-slate-900 dark:text-white border-2 border-slate-100 dark:border-slate-800 text-lg font-bold rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-all flex items-center justify-center gap-3 active:scale-95">
+            <span className="material-symbols-outlined fill-1 !text-[24px]">play_circle</span>
+            Watch Demo
+          </button>
+        </div>
+
+        <div className="w-full max-w-6xl relative group">
+           <div className="absolute inset-0 bg-primary/5 blur-3xl rounded-full scale-90 translate-y-10"></div>
+           <TiltedCard
+              imageSrc="https://images.pexels.com/photos/12362926/pexels-photo-12362926.jpeg"
+              altText="Gourmet Platter Display"
+              captionText="Discover Gourmet Recipes"
+              containerHeight="auto"
+              containerWidth="100%"
+              imageHeight="auto"
+              imageWidth="100%"
+              rotateAmplitude={6}
+              scaleOnHover={1.02}
+              showMobileWarning={false}
+              showTooltip={false}
+              displayOverlayContent
+              overlayContent={
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-[3rem] pointer-events-none"></div>
+              }
+           />
         </div>
       </section>
 
       {/* Features Section */}
-      <section className="px-6 md:px-12 py-20 lg:py-32 max-w-7xl mx-auto w-full">
-        <div className="max-w-2xl mb-16">
-          <h2 className="section-title text-3xl md:text-5xl font-black text-slate-900 dark:text-white mb-4 tracking-tighter">Effortless Kitchen Management</h2>
-          <p className="section-subtitle text-slate-500 dark:text-slate-400 font-bold text-lg leading-relaxed">Our smart tools help you save time, reduce food waste, and make grocery shopping a breeze.</p>
+      <section className="px-4 sm:px-12 py-32 max-w-7xl mx-auto w-full">
+        <div className="text-center mb-24">
+          <h2 className="text-4xl sm:text-5xl font-black text-slate-900 dark:text-white tracking-tighter mb-4 font-aesthetic">Effortless Kitchen Management</h2>
+          <p className="text-slate-500 dark:text-slate-400 font-medium text-lg max-w-2xl mx-auto font-aesthetic">Our smart tools help you save time, reduce food waste, and make grocery shopping a breeze.</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
           {[
-            { title: 'Pantry Tracking', icon: 'inventory_2', color: 'bg-emerald-100 text-emerald-600', desc: 'Never let ingredients go to waste. Track what you have in real-time with smart notifications.' },
-            { title: 'Smart Meal Planning', icon: 'calendar_month', color: 'bg-primary/10 text-primary', desc: 'Personalized weekly menus generated by AI based on your taste and dietary preferences.' },
-            { title: 'Automated Lists', icon: 'shopping_cart', color: 'bg-sky-100 text-sky-600', desc: 'Shop faster with intelligent lists synced automatically from your meal plan and pantry needs.' }
+            { title: 'Pantry Tracking', icon: 'inventory_2', color: 'text-emerald-500 bg-emerald-50', desc: 'Never let ingredients go to waste. Track what you have in real-time with smart notifications and expiration alerts.' },
+            { title: 'Smart Meal Planning', icon: 'calendar_month', color: 'text-primary bg-primary/5', desc: 'Personalized weekly menus generated by AI based on your taste profile, dietary goals, and current inventory.' },
+            { title: 'Automated Lists', icon: 'shopping_cart', color: 'text-sky-500 bg-sky-50', desc: 'Shop faster with intelligent lists synced automatically from your meal plan and current pantry needs.' }
           ].map((feature, i) => (
-            <div key={i} className="bg-slate-50 dark:bg-slate-900/50 p-10 rounded-[3rem] border border-slate-100 dark:border-slate-800 transition-all hover:shadow-2xl hover:shadow-slate-100 dark:hover:shadow-none group">
-              <div className={`size-14 rounded-2xl flex items-center justify-center mb-8 ${feature.color} group-hover:scale-110 transition-transform`}>
-                <span className="material-symbols-outlined !text-[32px]">{feature.icon}</span>
+            <div key={i} className="bg-white dark:bg-slate-900/50 p-10 rounded-[3rem] border border-slate-50 dark:border-slate-800 transition-all hover:shadow-2xl hover:-translate-y-2 group">
+              <div className={`size-16 rounded-2xl flex items-center justify-center mb-8 ${feature.color} group-hover:scale-110 transition-transform`}>
+                <span className="material-symbols-outlined !text-[36px]">{feature.icon}</span>
               </div>
-              <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-4 tracking-tight">{feature.title}</h3>
-              <p className="text-slate-500 dark:text-slate-400 font-bold text-base leading-relaxed">{feature.desc}</p>
+              <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-4 tracking-tight font-aesthetic">{feature.title}</h3>
+              <p className="text-slate-500 dark:text-slate-400 font-medium leading-relaxed font-aesthetic">{feature.desc}</p>
             </div>
           ))}
         </div>
       </section>
 
       {/* Trending Recipes */}
-      <section className="px-6 md:px-12 py-20 lg:py-32 bg-slate-50/50 dark:bg-slate-900/30">
+      <section className="px-4 sm:px-12 py-32 bg-slate-50/30 dark:bg-slate-900/10">
         <div className="max-w-7xl mx-auto w-full">
-          <div className="flex items-center justify-between mb-16">
-            <h2 className="text-3xl md:text-5xl font-black text-slate-900 dark:text-white tracking-tighter">Trending Recipes</h2>
+          <div className="flex items-end justify-between mb-16">
+            <div>
+              <h2 className="text-4xl sm:text-5xl font-black text-slate-900 dark:text-white tracking-tighter mb-2 font-aesthetic">Trending Recipes</h2>
+              <p className="text-slate-500 dark:text-slate-400 font-medium text-lg font-aesthetic">Hand-picked by our AI based on seasonal trends.</p>
+            </div>
             <div className="flex gap-4">
-              <button onClick={() => scroll('left')} className="size-11 rounded-full border border-slate-200 dark:border-slate-800 flex items-center justify-center text-slate-400 hover:text-primary transition-all active:scale-90 icon-button">
+              <button onClick={prevTrending} className="size-12 rounded-full border border-slate-200 dark:border-slate-800 flex items-center justify-center text-slate-400 hover:text-primary transition-all active:scale-90 bg-white dark:bg-slate-950">
                 <span className="material-symbols-outlined">chevron_left</span>
               </button>
-              <button onClick={() => scroll('right')} className="size-11 rounded-full border border-slate-200 dark:border-slate-800 flex items-center justify-center text-slate-400 hover:text-primary transition-all active:scale-90 icon-button">
+              <button onClick={nextTrending} className="size-12 rounded-full border border-slate-200 dark:border-slate-800 flex items-center justify-center text-slate-400 hover:text-primary transition-all active:scale-90 bg-white dark:bg-slate-950">
                 <span className="material-symbols-outlined">chevron_right</span>
               </button>
             </div>
           </div>
 
-          <div ref={scrollRef} className="flex gap-10 overflow-x-auto no-scrollbar scroll-smooth snap-x snap-mandatory pb-8">
-            {trendingRecipes.map((recipe, i) => (
-              <div key={i} className="flex-none w-[calc(100%)] sm:w-[calc(50%-1.25rem)] lg:w-[calc(33.333%-1.67rem)] snap-start group cursor-pointer flex flex-col gap-6">
-                <div className="aspect-[4/3] rounded-[3rem] overflow-hidden relative shadow-lg group-hover:shadow-2xl transition-all duration-500">
-                  <img src={recipe.img} alt={recipe.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                  {recipe.popular && (
-                    <span className="absolute top-6 left-6 px-4 py-1.5 bg-primary text-white text-[10px] font-black uppercase tracking-widest rounded-full shadow-lg">Popular</span>
-                  )}
-                </div>
-                <div className="px-2">
-                  <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-3 tracking-tight group-hover:text-primary transition-colors">{recipe.title}</h3>
-                  <div className="flex items-center gap-6 text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">
-                    <div className="flex items-center gap-2">
-                      <span className="material-symbols-outlined text-[20px]">timer</span>
-                      {recipe.time}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2">
+              <TiltedCard
+                key={`large-${trendingIndex}`}
+                imageSrc={currentSet.large.img}
+                altText={currentSet.large.title}
+                captionText={currentSet.large.title}
+                containerHeight="600px"
+                containerWidth="100%"
+                imageHeight="600px"
+                imageWidth="100%"
+                rotateAmplitude={8}
+                scaleOnHover={1.02}
+                showMobileWarning={false}
+                showTooltip={false}
+                displayOverlayContent
+                overlayContent={
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-12 rounded-[3rem]">
+                    <div className="absolute top-8 left-8">
+                       <span className="px-4 py-1.5 bg-primary text-white text-[10px] font-black uppercase tracking-widest rounded-lg font-aesthetic">Popular</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className="material-symbols-outlined text-[20px]">bar_chart</span>
-                      {recipe.diff}
+                    <h3 className="text-4xl font-black text-white mb-4 tracking-tight font-aesthetic">{currentSet.large.title}</h3>
+                    <div className="flex items-center gap-6 text-white/70 text-sm font-bold uppercase tracking-widest font-aesthetic">
+                      <span className="flex items-center gap-2"><span className="material-symbols-outlined !text-[20px]">timer</span> {currentSet.large.time}</span>
+                      <span className="flex items-center gap-2"><span className="material-symbols-outlined !text-[20px]">bar_chart</span> {currentSet.large.diff}</span>
                     </div>
                   </div>
-                </div>
-              </div>
-            ))}
+                }
+              />
+            </div>
+
+            <div className="flex flex-col gap-8">
+              <TiltedCard
+                key={`small1-${trendingIndex}`}
+                imageSrc={currentSet.small1.img}
+                altText={currentSet.small1.title}
+                captionText={currentSet.small1.title}
+                containerHeight="284px"
+                containerWidth="100%"
+                imageHeight="284px"
+                imageWidth="100%"
+                rotateAmplitude={12}
+                scaleOnHover={1.05}
+                showMobileWarning={false}
+                showTooltip={false}
+                displayOverlayContent
+                overlayContent={
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-8 rounded-[2.5rem]">
+                    <h4 className="text-xl font-black text-white mb-2 tracking-tight font-aesthetic">{currentSet.small1.title}</h4>
+                    <div className="flex items-center gap-4 text-white/60 text-[10px] font-black uppercase tracking-widest font-aesthetic">
+                      <span className="flex items-center gap-1.5"><span className="material-symbols-outlined !text-[16px]">timer</span> {currentSet.small1.time}</span>
+                      <span className="flex items-center gap-1.5"><span className="material-symbols-outlined !text-[16px]">bar_chart</span> {currentSet.small1.diff}</span>
+                    </div>
+                  </div>
+                }
+              />
+              <TiltedCard
+                key={`small2-${trendingIndex}`}
+                imageSrc={currentSet.small2.img}
+                altText={currentSet.small2.title}
+                captionText={currentSet.small2.title}
+                containerHeight="284px"
+                containerWidth="100%"
+                imageHeight="284px"
+                imageWidth="100%"
+                rotateAmplitude={12}
+                scaleOnHover={1.05}
+                showMobileWarning={false}
+                showTooltip={false}
+                displayOverlayContent
+                overlayContent={
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-8 rounded-[2.5rem]">
+                    <h4 className="text-xl font-black text-white mb-2 tracking-tight font-aesthetic">{currentSet.small2.title}</h4>
+                    <div className="flex items-center gap-4 text-white/60 text-[10px] font-black uppercase tracking-widest font-aesthetic">
+                      <span className="flex items-center gap-1.5"><span className="material-symbols-outlined !text-[16px]">timer</span> {currentSet.small2.time}</span>
+                      <span className="flex items-center gap-1.5"><span className="material-symbols-outlined !text-[16px]">bar_chart</span> {currentSet.small2.diff}</span>
+                    </div>
+                  </div>
+                }
+              />
+            </div>
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="px-6 md:px-12 py-12 md:py-20 border-t border-slate-100 dark:border-slate-900 bg-white dark:bg-slate-950">
+      <footer className="px-4 sm:px-12 py-24 bg-white dark:bg-slate-950 border-t border-slate-50 dark:border-slate-900">
         <div className="max-w-7xl mx-auto w-full flex flex-col items-center">
-          <div className="flex items-center gap-3 mb-10 group cursor-pointer" onClick={() => onNavigate('landing')}>
-            <div className="size-10 flex items-center justify-center bg-primary rounded-full shadow-lg shadow-primary/20">
-              <span className="material-symbols-outlined !text-[24px] text-white font-black">eco</span>
+          <div className="flex items-center gap-3 mb-16 group cursor-pointer" onClick={() => onNavigate('landing')}>
+            <div className="size-12 flex items-center justify-center bg-primary rounded-2xl shadow-lg shadow-primary/20">
+              <span className="material-symbols-outlined !text-[28px] text-white font-black">nutrition</span>
             </div>
-            <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">ChefMistri</h2>
+            <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight font-aesthetic">ChefMistri</h2>
           </div>
 
-          <div className="flex flex-wrap justify-center gap-8 md:gap-12 mb-12">
-            {['About Us', 'Contact', 'Privacy Policy', 'Terms of Service'].map(link => (
-              <button key={link} className="text-sm font-black text-slate-500 dark:text-slate-400 hover:text-primary transition-colors uppercase tracking-tight">{link}</button>
+          <div className="flex flex-wrap justify-center gap-12 mb-16">
+            {['ABOUT US', 'CONTACT', 'PRIVACY POLICY', 'TERMS OF SERVICE'].map(link => (
+              <button key={link} className="text-[11px] font-black text-slate-400 hover:text-primary transition-colors tracking-[0.2em] font-aesthetic">{link}</button>
             ))}
           </div>
 
-          <div className="flex gap-6 mb-12">
-            <a href="https://x.com" target="_blank" rel="noopener noreferrer" className="size-12 rounded-full bg-slate-50 dark:bg-slate-900 hover:scale-110 transition-all flex items-center justify-center active:scale-90 border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden p-2">
-              <img src="https://pngimg.com/uploads/x_logo/x_logo_PNG19.png" alt="X" className="w-full h-full object-contain" />
-            </a>
-            <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="size-12 rounded-full bg-slate-50 dark:bg-slate-900 hover:scale-110 transition-all flex items-center justify-center active:scale-90 border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden p-2">
-              <img src="https://pngimg.com/uploads/youtube/youtube_PNG15.png" alt="YouTube" className="w-full h-full object-contain" />
-            </a>
-            <a href="https://meta.com" target="_blank" rel="noopener noreferrer" className="size-12 rounded-full bg-slate-50 dark:bg-slate-900 hover:scale-110 transition-all flex items-center justify-center active:scale-90 border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden p-2">
-              <img src="https://www.citypng.com/public/uploads/preview/facebook-meta-logo-icon-hd-png-701751694777703xqxtpvbu9q.png" alt="Meta" className="w-full h-full object-contain" />
-            </a>
+          {/* Colorful Social Icons */}
+          <div className="flex gap-4 mb-16">
+              {/* X (Twitter) */}
+              <a href="#" className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center hover:opacity-80 transition-all shadow-md shadow-zinc-200">
+                  <iconify-icon icon="ri:twitter-x-fill" width="18"></iconify-icon>
+              </a>
+              {/* YouTube */}
+              <a href="#" className="w-10 h-10 rounded-full bg-[#FF0000] text-white flex items-center justify-center hover:opacity-80 transition-all shadow-md shadow-red-100">
+                  <iconify-icon icon="ri:youtube-fill" width="20"></iconify-icon>
+              </a>
+              {/* Meta */}
+              <a href="#" className="w-10 h-10 rounded-full bg-[#0064E0] text-white flex items-center justify-center hover:opacity-80 transition-all shadow-md shadow-blue-100">
+                  <iconify-icon icon="ri:meta-fill" width="22"></iconify-icon>
+              </a>
           </div>
 
-          <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">© {new Date().getFullYear()} ChefMistri Inc. All rights reserved.</p>
+          <p className="text-slate-400 text-[10px] font-bold uppercase tracking-[0.3em] text-center font-aesthetic">© 2026 CHEFMISTRI INC. ALL RIGHTS RESERVED.</p>
         </div>
       </footer>
     </div>
@@ -365,8 +465,7 @@ export default function App() {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [showAllStaples, setShowAllStaples] = useState(false);
 
-  // --- Meal Planner State Extensions ---
-  const [weeks, setWeeks] = useState<number[]>([0]); // Starts with current week
+  const [weeks, setWeeks] = useState<number[]>([0]);
   const topSentinelRef = useRef<HTMLDivElement>(null);
   const bottomSentinelRef = useRef<HTMLDivElement>(null);
   const horizontalScrollRefs = useRef<Record<number, HTMLDivElement | null>>({});
@@ -377,12 +476,12 @@ export default function App() {
     { id: '3', name: 'Greek Yogurt', category: 'Dairy & Eggs', completed: false, amount: '500g' },
     { id: '4', name: 'Chicken Breast', category: 'Meat', completed: false, amount: '1kg' },
     { id: '5', name: 'Basmati Rice', category: 'Pantry', completed: false, amount: '2kg' },
-    { id: '6', name: 'Organic Honey', category: 'Pantry', completed: true, amount: '1 jar' },
+    { id: '6', name: 'Organic Honey', category: 'Pantry', completed: true, amount: '1 jar' }
   ]);
   const [groceryInput, setGroceryInput] = useState('');
 
   const [mealPlan, setMealPlan] = useState<Record<string, Record<MealSlot, { title: string; calories?: string; image?: string } | null>>>({
-    'MON 23': { Breakfast: null, Lunch: MOCK_RECIPES[0], Dinner: MOCK_RECIPES[1] },
+    'MON 23': { Breakfast: null, Lunch: MOCK_RECIPES[0], Dinner: MOCK_RECIPES[1] }
   });
 
   const SAVED_RECIPES_MOCK: Recipe[] = useMemo(() => [
@@ -390,7 +489,7 @@ export default function App() {
     { ...MOCK_RECIPES[1], id: 's2', title: 'Lentil Burger', cookTime: '25 mins', calories: '410 kcal' },
     { ...MOCK_RECIPES[0], id: 's3', title: 'Pesto Pasta', cookTime: '20 mins', calories: '480 kcal' },
     { ...MOCK_RECIPES[1], id: 's4', title: 'Tuna Poke Bowl', cookTime: '15 mins', calories: '380 kcal' },
-    { ...MOCK_RECIPES[0], id: 's5', title: 'Veggie Ramen', cookTime: '30 mins', calories: '420 kcal' },
+    { ...MOCK_RECIPES[0], id: 's5', title: 'Veggie Ramen', cookTime: '30 mins', calories: '420 kcal' }
   ], []);
 
   const filteredRecommendations = useMemo(() => {
@@ -440,11 +539,9 @@ export default function App() {
     }));
   };
 
-  // --- Date Logic for Planner ---
   const getDaysForWeek = (weekOffset: number) => {
     const days = [];
     const baseDate = new Date();
-    // Adjust to Monday of the offset week
     const day = baseDate.getDay();
     const diff = baseDate.getDate() - day + (day === 0 ? -6 : 1) + (weekOffset * 7);
     const monday = new Date(baseDate.setDate(diff));
@@ -459,10 +556,8 @@ export default function App() {
     return days;
   };
 
-  // --- Infinite Scroll Implementation ---
   useEffect(() => {
     if (view !== 'cookbook') return;
-
     const options = { threshold: 0.1 };
     const handleObserver = (entries: IntersectionObserverEntry[]) => {
       entries.forEach(entry => {
@@ -475,19 +570,16 @@ export default function App() {
         }
       });
     };
-
     const observer = new IntersectionObserver(handleObserver, options);
     if (topSentinelRef.current) observer.observe(topSentinelRef.current);
     if (bottomSentinelRef.current) observer.observe(bottomSentinelRef.current);
-
     return () => observer.disconnect();
   }, [view]);
 
-  // --- Horizontal Arrow Navigation ---
   const handleScrollWeek = (week: number, direction: 'left' | 'right') => {
     const container = horizontalScrollRefs.current[week];
     if (container) {
-      const scrollAmount = 340 + 32; // Card width + gap
+      const scrollAmount = 340 + 32;
       container.scrollBy({
         left: direction === 'left' ? -scrollAmount : scrollAmount,
         behavior: 'smooth'
@@ -498,12 +590,9 @@ export default function App() {
   const handleAddIngredient = (name: string, qty?: number | string, unit?: string) => {
     const finalName = name.trim();
     if (!finalName) return;
-    
     const exists = pantry.find(p => p.name.toLowerCase() === finalName.toLowerCase());
     if (exists) return;
-    
     const quantityValue = Number(qty ?? inputQuantity) || 1;
-    
     const newItem: Ingredient = { 
       id: Date.now().toString(), 
       name: finalName, 
@@ -511,7 +600,6 @@ export default function App() {
       unit: unit ?? inputUnit, 
       category: 'Pantry' 
     };
-    
     setPantry(prev => [...prev, newItem]);
     setInputValue('');
     setInputQuantity('1');
@@ -718,7 +806,6 @@ export default function App() {
         return (
           <div className="flex flex-col flex-1 h-screen overflow-y-auto overflow-x-hidden no-scrollbar pb-32">
             <div className="p-4 md:p-8 lg:p-12 flex flex-col gap-10 md:gap-14">
-              {/* Smarter Header with Insights */}
               <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-8 max-w-[1084px] mx-auto w-full">
                 <div>
                   <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary/10 text-primary rounded-full text-[10px] font-black uppercase tracking-widest mb-4 animate-bounce">
@@ -747,7 +834,6 @@ export default function App() {
                 </div>
               </div>
 
-              {/* Infinite Content Area */}
               <div className="flex flex-col gap-16">
                 <div ref={topSentinelRef} className="h-1 opacity-0" />
                 
@@ -755,14 +841,12 @@ export default function App() {
                   const weekDays = getDaysForWeek(weekOffset);
                   return (
                     <div key={weekOffset} className="relative group max-w-[1084px] mx-auto w-full">
-                      {/* Section Header for the week */}
                       <div className="flex items-center justify-between mb-8 px-4">
                         <h2 className="text-xl font-black text-slate-300 dark:text-slate-600 uppercase tracking-widest">
                           {weekOffset === 0 ? "Current Week" : weekOffset === 1 ? "Next Week" : weekOffset === -1 ? "Last Week" : `Week Offset: ${weekOffset}`}
                         </h2>
                       </div>
 
-                      {/* Navigation Arrows */}
                       <button 
                         onClick={() => handleScrollWeek(weekOffset, 'left')}
                         className="absolute left-[-16px] top-[50%] -translate-y-[50%] size-11 rounded-full bg-slate-900/80 dark:bg-white/80 backdrop-blur-md text-white dark:text-slate-900 flex items-center justify-center z-20 shadow-xl opacity-0 group-hover:opacity-100 transition-all hover:scale-110 active:scale-90 planner-arrow left icon-button"
@@ -776,9 +860,8 @@ export default function App() {
                         <span className="material-symbols-outlined">chevron_right</span>
                       </button>
 
-                      {/* Horizontal Planner Row */}
                       <div 
-                        ref={el => horizontalScrollRefs.current[weekOffset] = el}
+                        ref={el => { horizontalScrollRefs.current[weekOffset] = el; }}
                         className="flex-1 overflow-x-auto overflow-y-hidden no-scrollbar scroll-smooth snap-x snap-mandatory flex gap-8 px-4 min-h-[750px] md:min-h-[1050px]"
                       >
                         {weekDays.map((dayKey) => {
@@ -793,7 +876,6 @@ export default function App() {
 
                           return (
                             <div key={dayKey} className={`w-[340px] shrink-0 snap-start flex flex-col h-full bg-white dark:bg-slate-900 p-8 md:p-12 rounded-[4rem] md:rounded-[5rem] border-2 transition-all ${isToday ? 'border-primary shadow-2xl shadow-primary/5' : 'border-slate-50 dark:border-slate-800 shadow-sm'}`}>
-                              {/* Day Card Header */}
                               <div className="flex items-start justify-between mb-12 border-b border-slate-50 dark:border-slate-800 pb-8">
                                 <div>
                                   <span className="text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.4em] mb-1 block">{dayKey.split(' ')[0]}</span>
@@ -820,7 +902,6 @@ export default function App() {
                                 </div>
                               </div>
 
-                              {/* Slots */}
                               <div className="flex-1 flex flex-col gap-8">
                                 {(['Breakfast', 'Lunch', 'Dinner'] as MealSlot[]).map((slot) => {
                                   const meal = dayMeals[slot];
@@ -871,7 +952,6 @@ export default function App() {
                 </div>
               </div>
 
-              {/* Weekly Insight Summary - Anchored below current view */}
               <div className="max-w-[1084px] mx-auto w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-[2.5rem] p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-8 shadow-2xl transition-all">
                  <div className="flex flex-col gap-3">
                     <h3 className="text-2xl md:text-4xl font-black tracking-tighter leading-none">Balanced Week Ahead</h3>
@@ -1052,12 +1132,6 @@ export default function App() {
                   </div>
                 </div>
               ))}
-              {filteredRecommendations.length === 0 && (
-                <div className="col-span-full text-center py-32 md:py-60">
-                  <span className="material-symbols-outlined text-[64px] md:text-[80px] text-slate-100 mb-6">search_off</span>
-                  <p className="text-slate-400 font-black text-2xl md:text-4xl italic tracking-tighter">No recipes found for "{searchQuery}"</p>
-                </div>
-              )}
             </div>
           </section>
         );
@@ -1070,7 +1144,6 @@ export default function App() {
               <span className="material-symbols-outlined text-[20px] md:text-[24px] group-hover:-translate-x-2 transition-transform">arrow_back</span> 
               Back to feed
             </button>
-            
             <div className="flex flex-col gap-10 md:gap-20 pb-16 md:pb-32">
               <div className="flex flex-col gap-6">
                 <h1 className="text-4xl md:text-7xl lg:text-8xl font-black text-slate-900 dark:text-white leading-[1.1] tracking-tighter">{selectedRecipe.title}</h1>
@@ -1090,12 +1163,10 @@ export default function App() {
                 </div>
                 <p className="text-lg md:text-2xl lg:text-3xl font-bold text-slate-400 dark:text-slate-500 leading-relaxed max-w-4xl mt-6 md:mt-8">{selectedRecipe.description}</p>
               </div>
-
               <div className="flex flex-col xl:flex-row gap-10 md:gap-20 items-stretch">
                 <div className="xl:w-3/5 w-full h-[320px] md:h-[600px] lg:h-[700px]">
                   <RecipeImage src={selectedRecipe.image} alt={selectedRecipe.title} className="w-full h-full rounded-[3rem] md:rounded-[5rem] shadow-2xl shadow-slate-200/50 dark:shadow-none object-cover" />
                 </div>
-                
                 <div className="xl:w-2/5 w-full bg-slate-50 dark:bg-slate-900 p-10 md:p-16 rounded-[3rem] md:rounded-[5rem] border border-slate-100 dark:border-slate-800 shadow-sm transition-all hover:border-primary/20">
                   <h3 className="text-3xl md:text-4xl lg:text-5xl font-black mb-10 md:mb-16 text-slate-900 dark:text-white tracking-tight">Ingredients</h3>
                   <div className="flex flex-col gap-6 md:gap-12">
@@ -1111,59 +1182,9 @@ export default function App() {
                   </div>
                 </div>
               </div>
-
-              {/* Nutrition Section */}
-              <div className="bg-white dark:bg-slate-900 p-10 md:p-16 lg:p-24 rounded-[3rem] md:rounded-[6rem] border border-slate-100 dark:border-slate-800 shadow-sm transition-colors">
-                <h3 className="text-2xl md:text-4xl font-black mb-10 md:mb-16 text-slate-900 dark:text-white tracking-tight flex items-center gap-5">
-                  <span className="material-symbols-outlined text-primary text-[32px] md:text-[48px]">analytics</span>
-                  Dietary Analysis
-                </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-10 md:gap-20">
-                  <div className="flex flex-col gap-3 md:gap-4">
-                    <span className="text-[11px] md:text-[13px] font-black text-slate-400 uppercase tracking-[0.3em]">Protein</span>
-                    <div className="text-4xl md:text-6xl font-black text-slate-900 dark:text-white tracking-tighter">{selectedRecipe.nutrition.protein}</div>
-                    <div className="w-full h-2.5 md:h-4 bg-primary/10 rounded-full overflow-hidden">
-                      <div className="h-full bg-primary" style={{width: '75%'}}></div>
-                    </div>
-                  </div>
-                  <div className="flex flex-col gap-3 md:gap-4">
-                    <span className="text-[11px] md:text-[13px] font-black text-slate-400 uppercase tracking-[0.3em]">Carbohydrates</span>
-                    <div className="text-4xl md:text-6xl font-black text-slate-900 dark:text-white tracking-tighter">{selectedRecipe.nutrition.carbs}</div>
-                    <div className="w-full h-2.5 md:h-4 bg-blue-500/10 rounded-full overflow-hidden">
-                      <div className="h-full bg-blue-500" style={{width: '60%'}}></div>
-                    </div>
-                  </div>
-                  <div className="flex flex-col gap-3 md:gap-4">
-                    <span className="text-[11px] md:text-[13px] font-black text-slate-400 uppercase tracking-[0.3em]">Healthy Fats</span>
-                    <div className="text-4xl md:text-6xl font-black text-slate-900 dark:text-white tracking-tighter">{selectedRecipe.nutrition.fats}</div>
-                    <div className="w-full h-2.5 md:h-4 bg-orange-500/10 rounded-full overflow-hidden">
-                      <div className="h-full bg-orange-500" style={{width: '40%'}}></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Steps Section */}
-              <div className="bg-slate-900 text-white dark:bg-white dark:text-slate-900 p-10 md:p-20 lg:p-32 rounded-[3.5rem] md:rounded-[7rem] shadow-2xl transition-all">
-                <h3 className="text-3xl md:text-5xl lg:text-6xl font-black mb-12 md:mb-24 tracking-tighter">Cooking Methodology</h3>
-                <div className="flex flex-col gap-10 md:gap-20">
-                  {selectedRecipe.steps.map((step, i) => (
-                    <div key={i} className="flex gap-8 md:gap-16 items-start group">
-                      <div className="flex flex-col items-center gap-4">
-                        <span className="size-12 md:size-20 shrink-0 bg-white/10 dark:bg-slate-900/10 text-primary rounded-[1.5rem] md:rounded-[2.5rem] flex items-center justify-center font-black text-xl md:text-4xl group-hover:scale-110 transition-transform">{i + 1}</span>
-                        {i < selectedRecipe.steps.length - 1 && (
-                          <div className="w-px h-16 md:h-32 bg-white/10 dark:bg-slate-900/10"></div>
-                        )}
-                      </div>
-                      <p className="text-lg md:text-3xl lg:text-4xl font-black md:font-bold leading-[1.4] pt-1 md:pt-4 text-slate-100 dark:text-slate-800 opacity-90 group-hover:opacity-100 transition-opacity">{step}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
             </div>
           </main>
         );
-
       default:
         return <div className="p-20 text-center font-black text-slate-200 text-3xl">Coming Soon</div>;
     }
@@ -1171,19 +1192,11 @@ export default function App() {
 
   return (
     <div className={`min-h-screen flex flex-col lg:flex-row transition-colors ${isDarkMode ? 'bg-[#0a0f0b]' : 'bg-[#F9FCFA]'}`}>
-      {view === 'landing' ? (
-        renderContent()
-      ) : (
+      {view === 'landing' ? renderContent() : (
         <>
           <Sidebar currentView={view} onNavigate={setView} />
-          
           <div className="flex-1 flex flex-col h-screen overflow-hidden relative">
-            <Header 
-              onNavigate={setView} 
-              onSearch={setSearchQuery} 
-              isDarkMode={isDarkMode} 
-              toggleDarkMode={toggleDarkMode} 
-            />
+            <Header onNavigate={setView} onSearch={setSearchQuery} isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} />
             <main className="flex-1 flex flex-col overflow-y-auto overflow-x-hidden no-scrollbar">
               {renderContent()}
             </main>
@@ -1191,37 +1204,15 @@ export default function App() {
           </div>
         </>
       )}
-      
       {isGenerating && (
-        <div className="fixed inset-0 z-[200] bg-slate-900/60 backdrop-blur-2xl flex items-center justify-center animate-in fade-in zoom-in duration-500 p-6">
-          <div className="bg-white dark:bg-slate-900 p-12 md:p-24 rounded-[4rem] md:rounded-[6rem] shadow-[0_0_100px_rgba(19,236,55,0.15)] flex flex-col items-center gap-10 md:gap-16 text-center max-w-lg border border-white/20">
+        <div className="fixed inset-0 z-[200] bg-slate-900/60 backdrop-blur-2xl flex items-center justify-center p-6">
+          <div className="bg-white dark:bg-slate-900 p-12 md:p-24 rounded-[4rem] flex flex-col items-center gap-10 md:gap-16 text-center max-w-lg">
             <div className="relative size-24 md:size-40">
-              <div className="absolute inset-0 border-[6px] md:border-[10px] border-primary/10 rounded-full" />
-              <div className="absolute inset-0 border-[6px] md:border-[10px] border-t-primary rounded-full animate-spin" />
-              <div className="absolute inset-4 md:inset-8 bg-primary/5 rounded-full flex items-center justify-center animate-pulse">
-                <span className="material-symbols-outlined !text-[32px] md:!text-[48px] text-primary">restaurant</span>
-              </div>
+              <div className="absolute inset-0 border-[6px] border-primary/10 rounded-full" />
+              <div className="absolute inset-0 border-[6px] border-t-primary rounded-full animate-spin" />
             </div>
-            <div>
-              <h4 className="font-black text-3xl md:text-5xl text-slate-900 dark:text-white mb-4 tracking-tighter">Chef Mistri is Thinking</h4>
-              <p className="text-slate-400 dark:text-slate-500 font-bold text-base md:text-xl leading-relaxed">Analyzing your unique flavors to build the perfect gourmet recipes...</p>
-            </div>
+            <h4 className="font-black text-3xl md:text-5xl text-slate-900 dark:text-white">Thinking...</h4>
           </div>
-        </div>
-      )}
-
-      {errorMsg && (
-        <div className="fixed bottom-28 md:bottom-12 left-1/2 -translate-x-1/2 z-[300] bg-[#e63946] text-white px-8 md:px-12 py-5 md:py-8 rounded-[2.5rem] md:rounded-[3rem] font-black shadow-2xl flex items-center gap-6 md:gap-10 w-[94%] md:max-w-3xl animate-in slide-in-from-bottom-12 duration-500 ring-8 ring-[#e63946]/10">
-          <div className="hidden sm:flex bg-white/20 p-4 rounded-3xl items-center justify-center">
-            <span className="material-symbols-outlined text-white text-[32px] md:text-[40px] font-black">warning</span>
-          </div>
-          <div className="flex-1 text-sm md:text-lg">
-            <p className="opacity-70 font-black mb-1 text-xs md:text-sm uppercase tracking-widest">Kitchen Alert</p>
-            <p className="leading-snug">{errorMsg}</p>
-          </div>
-          <button onClick={() => setErrorMsg(null)} className="p-2 md:p-3 hover:bg-white/10 rounded-2xl transition-all active:scale-90 icon-button">
-            <span className="material-symbols-outlined text-[24px] md:text-[32px]">close</span>
-          </button>
         </div>
       )}
     </div>

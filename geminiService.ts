@@ -1,3 +1,4 @@
+
 import { GoogleGenAI, Type } from "@google/genai";
 import { Recipe, UserPreferences } from "./types.ts";
 
@@ -120,7 +121,7 @@ export const generateRecipesFromPantry = async (ingredients: string[], prefs: Us
   
   const ai = getAI();
   if (!ai) {
-    throw new Error("API_KEY is missing. Since you added it to Vercel, please trigger a NEW DEPLOYMENT.");
+    throw new Error("The application is missing a valid API key configuration.");
   }
 
   const prompt = `Return strictly a JSON array of 3 creative recipes using these ingredients: ${ingredients.join(', ')}. 
