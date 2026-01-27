@@ -10,8 +10,9 @@ declare global {
   }
 }
 
-// Fix: Augment the React namespace to add 'iconify-icon' while preserving all standard HTML elements.
-// Using declare module 'react' is the standard way to extend React's JSX definitions.
+// Fix: Augment the React JSX namespace instead of the global JSX namespace.
+// This ensures that interface merging happens correctly with standard HTML elements (div, span, etc.)
+// defined in the React types, while adding the custom 'iconify-icon' element.
 declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {

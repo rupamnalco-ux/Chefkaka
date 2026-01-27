@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en" class="light">
   <head>
@@ -32,9 +33,10 @@
               "text-secondary": "#4c9a59",
               "border-light": "#cfe7d3",
               "border-dark": "#2a4e30",
+              "mint-base": "#ECF9F0",
             },
             backgroundImage: {
-              'mint-subtle': 'linear-gradient(135deg, #F9FCFA 0%, #F5FBF5 50%, #F9FCFA 100%)',
+              'mint-subtle': 'linear-gradient(135deg, #ECF9F0 0%, #F5FBF5 50%, #ECF9F0 100%)',
             },
             fontFamily: {
               display: ["Work Sans", "sans-serif"],
@@ -50,6 +52,17 @@
               "4xl": "2rem",
               full: "9999px"
             },
+            animation: {
+              'blob': 'blob 7s infinite',
+            },
+            keyframes: {
+              blob: {
+                '0%': { transform: 'translate(0px, 0px) scale(1)' },
+                '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+                '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+                '100%': { transform: 'translate(0px, 0px) scale(1)' },
+              }
+            }
           },
         },
       }
@@ -80,96 +93,77 @@
         scrollbar-width: none;
       }
 
+      /* Liquid Glassmorphism Effect */
+      .liquid-glass {
+        background: linear-gradient(135deg, rgba(249, 115, 22, 0.75), rgba(251, 191, 36, 0.75));
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        box-shadow: 0 8px 32px 0 rgba(249, 115, 22, 0.2);
+        color: white !important;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+      }
+
+      .liquid-glass:hover {
+        background: linear-gradient(135deg, rgba(249, 115, 22, 0.9), rgba(251, 191, 36, 0.9));
+        box-shadow: 0 12px 48px 0 rgba(249, 115, 22, 0.35);
+        transform: translateY(-2px) scale(1.02);
+      }
+
+      .liquid-glass::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+        transform: translate(-10%, -10%);
+        transition: all 0.6s ease;
+        pointer-events: none;
+      }
+
+      .liquid-glass:hover::before {
+        transform: translate(10%, 10%);
+      }
+
+      .liquid-glass-white {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+      }
+
+      .liquid-glass-white:hover {
+        background: rgba(255, 255, 255, 0.2);
+        border-color: rgba(251, 191, 36, 0.5);
+      }
+
+      .text-gradient-mix {
+        background: linear-gradient(to right, #13ec37, #f97316, #fbbf24);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
       /* Dark Mode Button Glow - Additive Enhancement */
       .dark button {
         position: relative;
         transition: box-shadow 0.25s ease, transform 0.15s ease;
       }
 
-      .dark button:not(:disabled) {
-        /* Subtle Idle Glow using the primary green #13ec37 */
+      .dark button:not(.liquid-glass):not(:disabled) {
         box-shadow: 0 0 12px rgba(19, 236, 55, 0.12);
       }
 
-      .dark button:not(:disabled):hover {
-        /* Intense Hover Glow */
+      .dark button:not(.liquid-glass):not(:disabled):hover {
         box-shadow: 
           0 0 18px rgba(19, 236, 55, 0.35),
           0 0 36px rgba(19, 236, 55, 0.25);
         transform: translateY(-1px);
-      }
-
-      .dark button:not(:disabled):active {
-        /* Active Press State */
-        transform: translateY(0);
-        box-shadow: 0 0 10px rgba(19, 236, 55, 0.25);
-      }
-
-      .dark button:focus-visible {
-        /* Focus state for accessibility */
-        outline: none;
-        box-shadow: 
-          0 0 0 2px rgba(19, 236, 55, 0.6),
-          0 0 24px rgba(19, 236, 55, 0.4);
-      }
-
-      .dark button:disabled {
-        box-shadow: none !important;
-      }
-
-      /* Specific lower intensity for icon buttons in dark mode */
-      .dark button.icon-button:hover {
-        box-shadow: 0 0 12px rgba(19, 236, 55, 0.25) !important;
-      }
-
-      /* Yellow Glow Button (Landing Page Theme Toggle) */
-      .dark .yellow-glow-button {
-        box-shadow: 
-          0 0 12px rgba(250, 204, 21, 0.35),
-          0 0 28px rgba(250, 204, 21, 0.25) !important;
-        transition: box-shadow 0.25s ease;
-      }
-
-      .dark .yellow-glow-button:hover {
-        box-shadow: 
-          0 0 18px rgba(250, 204, 21, 0.55),
-          0 0 42px rgba(250, 204, 21, 0.35) !important;
-      }
-
-      .dark .yellow-glow-button:focus-visible {
-        outline: none;
-        box-shadow: 
-          0 0 0 2px rgba(250, 204, 21, 0.8),
-          0 0 32px rgba(250, 204, 21, 0.5) !important;
-      }
-
-      /* Section Title and Subtitle Single-Line Rendering */
-      .section-title, .section-subtitle {
-        white-space: nowrap;
-      }
-
-      @media (max-width: 768px) {
-        .section-title, .section-subtitle {
-          white-space: normal;
-        }
-      }
-
-      /* Meal Planner Navigation Alignment Fixes for Dark Mode */
-      .dark .planner-arrow {
-        top: 50% !important;
-        transform: translateY(-50%) !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        box-sizing: border-box !important;
-      }
-
-      .dark .planner-arrow.left {
-        left: -16px !important;
-      }
-
-      .dark .planner-arrow.right {
-        right: -16px !important;
       }
 
       @media print {

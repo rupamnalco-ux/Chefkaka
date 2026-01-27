@@ -23,7 +23,7 @@ interface TiltedCardProps {
   showTooltip?: boolean;
   overlayContent?: React.ReactNode;
   displayOverlayContent?: boolean;
-  /* Fix: Explicitly include key in props interface to satisfy strict TypeScript checking in App.tsx */
+  onClick?: () => void;
   key?: React.Key;
 }
 
@@ -40,7 +40,8 @@ export default function TiltedCard({
   showMobileWarning = true,
   showTooltip = true,
   overlayContent = null,
-  displayOverlayContent = false
+  displayOverlayContent = false,
+  onClick
 }: TiltedCardProps) {
   const ref = useRef<HTMLElement>(null);
 
@@ -95,7 +96,7 @@ export default function TiltedCard({
   return (
     <figure
       ref={ref}
-      className="tilted-card-figure"
+      className={`tilted-card-figure ${onClick ? 'cursor-pointer' : ''}`}
       style={{
         height: containerHeight,
         width: containerWidth
@@ -103,6 +104,7 @@ export default function TiltedCard({
       onMouseMove={handleMouse}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
+      onClick={onClick}
     >
       {showMobileWarning && (
         <div className="tilted-card-mobile-alert">This effect is not optimized for mobile. Check on desktop.</div>

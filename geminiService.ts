@@ -2,6 +2,7 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { Recipe, UserPreferences } from "./types.ts";
 
+// Utility to safely extract JSON from AI response strings
 const extractJSON = (text: string) => {
   try {
     return JSON.parse(text);
@@ -39,7 +40,7 @@ export const generateAIImage = async (prompt: string): Promise<string> => {
   const fallback = `https://image.pollinations.ai/prompt/professional%20food%20photography%20of%20${encodeURIComponent(prompt)}?width=1024&height=1024&seed=${seed}&model=flux`;
   
   try {
-    // Correctly initialize right before the call as per guidelines
+    // Correctly initialize right before the call as per guidelines to use the most recent key
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
     const response = await ai.models.generateContent({
@@ -55,7 +56,7 @@ export const generateAIImage = async (prompt: string): Promise<string> => {
     const candidate = response.candidates?.[0];
     if (candidate?.content?.parts) {
       for (const part of candidate.content.parts) {
-        // Find the image part in the response
+        // Find the image part in the response as it might not be the first part
         if (part.inlineData) {
           const base64EncodeString: string = part.inlineData.data;
           return `data:image/png;base64,${base64EncodeString}`;
@@ -120,8 +121,9 @@ export const generateRecipesFromPantry = async (ingredients: string[], prefs: Us
     Diet: ${prefs.dietType}. Allergies: ${prefs.allergies.join(', ') || 'None'}. Level: ${prefs.skillLevel}. 
     Do not include markdown headers. Output ONLY JSON.`;
 
+    // Upgrade to gemini-3-pro-preview for complex reasoning and structured schema tasks
     const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
+      model: "gemini-3-pro-preview",
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -132,7 +134,7 @@ export const generateRecipesFromPantry = async (ingredients: string[], prefs: Us
       }
     });
 
-    // Directly access .text property as per extraction rules
+    // Directly access .text property as per guidelines (it is a getter, not a method)
     const results = extractJSON(response.text || "[]");
     
     const recipes: Recipe[] = [];
