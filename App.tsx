@@ -475,7 +475,7 @@ const Landing: React.FC<{
               </a>
           </div>
 
-          <p className="text-slate-400 text-[10px] font-bold uppercase tracking-[0.3em] text-center font-aesthetic">© 2026 CHEFMISTRI INC. ALL RIGHTS RESERVED.</p>
+          <p className="text-slate-400 text-[10px] font-bold uppercase tracking-[0.3em] text-center font-aesthetic">© 2025 CHEFMISTRI INC. ALL RIGHTS RESERVED.</p>
         </div>
       </footer>
     </div>
