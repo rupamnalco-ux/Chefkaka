@@ -10,20 +10,6 @@ declare global {
   }
 }
 
-// Fix: Augment the React JSX namespace instead of the global JSX namespace.
-// This ensures that interface merging happens correctly with standard HTML elements (div, span, etc.)
-// defined in the React types, while adding the custom 'iconify-icon' element.
-declare module 'react' {
-  namespace JSX {
-    interface IntrinsicElements {
-      'iconify-icon': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & { 
-        icon?: string; 
-        width?: string | number;
-      };
-    }
-  }
-}
-
 export interface Ingredient {
   id: string;
   name: string;

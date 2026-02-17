@@ -2,7 +2,6 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { Recipe, UserPreferences } from "./types.ts";
 
-// Utility to safely extract JSON from AI response strings
 const extractJSON = (text: string) => {
   try {
     return JSON.parse(text);
@@ -12,9 +11,10 @@ const extractJSON = (text: string) => {
       try {
         return JSON.parse(match[1]);
       } catch (e2) {
-        console.error("Failed to parse extracted JSON:", e2);
+        console.error("Failed to parse extracted JSON block:", e2);
       }
     }
+    // Fallback manual slice
     const firstBracket = Math.min(
       text.indexOf('[') === -1 ? Infinity : text.indexOf('['),
       text.indexOf('{') === -1 ? Infinity : text.indexOf('{')
@@ -25,47 +25,34 @@ const extractJSON = (text: string) => {
       try {
         return JSON.parse(text.substring(firstBracket, lastBracket + 1));
       } catch (e3) {
-        throw new Error("Could not extract valid JSON from response");
+        throw new Error("AI returned invalid JSON format. Please try again.");
       }
     }
-    throw e;
+    throw new Error("Could not find recipe data in AI response.");
   }
 };
 
-/**
- * Generates a high-quality food image for a given recipe title using Gemini.
- */
 export const generateAIImage = async (prompt: string): Promise<string> => {
   const seed = Math.floor(Math.random() * 10000);
-  const fallback = `https://image.pollinations.ai/prompt/professional%20food%20photography%20of%20${encodeURIComponent(prompt)}?width=1024&height=1024&seed=${seed}&model=flux`;
+  const fallback = `https://image.pollinations.ai/prompt/professional%20food%20photography%20of%20${encodeURIComponent(prompt)}?width=800&height=800&seed=${seed}&model=flux`;
   
   try {
-    // Correctly initialize right before the call as per guidelines to use the most recent key
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash-image',
       contents: {
-        parts: [{ text: `A professional food photography shot of ${prompt}. Gourmet presentation, vibrant colors, bokeh background, 4k.` }],
+        parts: [{ text: `A vibrant gourmet plated food shot of ${prompt}. Pro lighting, 4k.` }],
       },
-      config: {
-        imageConfig: { aspectRatio: "1:1" },
-      },
+      config: { imageConfig: { aspectRatio: "1:1" } },
     });
 
-    const candidate = response.candidates?.[0];
-    if (candidate?.content?.parts) {
-      for (const part of candidate.content.parts) {
-        // Find the image part in the response as it might not be the first part
-        if (part.inlineData) {
-          const base64EncodeString: string = part.inlineData.data;
-          return `data:image/png;base64,${base64EncodeString}`;
-        }
-      }
+    const part = response.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
+    if (part?.inlineData) {
+      return `data:image/png;base64,${part.inlineData.data}`;
     }
     return fallback;
   } catch (error) {
-    console.warn("Gemini Image Generation failed, falling back to Pollinations:", error);
+    console.warn("Image gen failed:", error);
     return fallback;
   }
 };
@@ -73,7 +60,6 @@ export const generateAIImage = async (prompt: string): Promise<string> => {
 const fullRecipeSchema = {
   type: Type.OBJECT,
   properties: {
-    id: { type: Type.STRING },
     title: { type: Type.STRING },
     description: { type: Type.STRING },
     prepTime: { type: Type.STRING },
@@ -81,49 +67,37 @@ const fullRecipeSchema = {
     servings: { type: Type.NUMBER },
     calories: { type: Type.STRING },
     matchPercentage: { type: Type.NUMBER },
-    difficulty: { type: Type.STRING, enum: ["Easy", "Med", "Hard"] },
+    difficulty: { type: Type.STRING },
     ingredients: { 
       type: Type.ARRAY, 
       items: { 
         type: Type.OBJECT, 
-        properties: { 
-          name: { type: Type.STRING },
-          amount: { type: Type.STRING }
-        },
+        properties: { name: { type: Type.STRING }, amount: { type: Type.STRING } },
         required: ["name", "amount"]
       } 
     },
     steps: { type: Type.ARRAY, items: { type: Type.STRING } },
     nutrition: {
       type: Type.OBJECT,
-      properties: {
-        protein: { type: Type.STRING },
-        carbs: { type: Type.STRING },
-        fats: { type: Type.STRING }
-      },
+      properties: { protein: { type: Type.STRING }, carbs: { type: Type.STRING }, fats: { type: Type.STRING } },
       required: ["protein", "carbs", "fats"]
     }
   },
-  required: ["title", "description", "prepTime", "cookTime", "ingredients", "steps", "difficulty", "nutrition"]
+  required: ["title", "description", "prepTime", "cookTime", "ingredients", "steps", "difficulty", "nutrition", "calories", "matchPercentage"]
 };
 
-/**
- * Uses Gemini to generate recipes based on provided ingredients and user preferences.
- */
 export const generateRecipesFromPantry = async (ingredients: string[], prefs: UserPreferences): Promise<Recipe[]> => {
   if (ingredients.length === 0) return [];
   
   try {
-    // Correctly initialize right before the call
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-    
-    const prompt = `Return strictly a JSON array of 3 creative recipes using these ingredients: ${ingredients.join(', ')}. 
-    Diet: ${prefs.dietType}. Allergies: ${prefs.allergies.join(', ') || 'None'}. Level: ${prefs.skillLevel}. 
-    Do not include markdown headers. Output ONLY JSON.`;
+    const prompt = `Generate 3 creative gourmet recipes using: ${ingredients.join(', ')}. 
+    Dietary preferences: ${prefs.dietType}. 
+    Allergies to avoid: ${prefs.allergies.join(', ') || 'None'}.
+    User Skill Level: ${prefs.skillLevel}.`;
 
-    // Upgrade to gemini-3-pro-preview for complex reasoning and structured schema tasks
     const response = await ai.models.generateContent({
-      model: "gemini-3-pro-preview",
+      model: "gemini-3-flash-preview",
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -134,24 +108,21 @@ export const generateRecipesFromPantry = async (ingredients: string[], prefs: Us
       }
     });
 
-    // Directly access .text property as per guidelines (it is a getter, not a method)
     const results = extractJSON(response.text || "[]");
     
-    const recipes: Recipe[] = [];
-    for (const r of results) {
-      // Small delay to prevent rate limiting during sequential image generation
-      await new Promise(resolve => setTimeout(resolve, 100));
+    // Parallelize image generation for speed
+    const recipePromises = results.map(async (r: any) => {
       const image = await generateAIImage(r.title);
-      recipes.push({
+      return {
         ...r,
-        id: r.id || Math.random().toString(36).substr(2, 9),
+        id: Math.random().toString(36).substr(2, 9),
         image
-      });
-    }
+      };
+    });
 
-    return recipes;
+    return await Promise.all(recipePromises);
   } catch (error: any) {
-    console.error("Gemini Recipe Generation Error:", error);
+    console.error("Recipe Generation Error:", error);
     throw error;
   }
 };
