@@ -12,7 +12,7 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Work+Sans:wght@300;400;500;600;700;900&family=Noto+Sans:wght@400;500;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=Plus+Jakarta+Sans:wght@200;300;400;500;600;700;800&family=Outfit:wght@100;200;300;400;500;600;700;800;900&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
     <script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js"></script>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
@@ -22,155 +22,112 @@
         theme: {
           extend: {
             colors: {
-              primary: "#13ec37",
-              "primary-dark": "#0fb62b",
-              "primary-hover": "#0fd330",
-              "background-light": "#F9FCFA",
-              "background-dark": "#102213",
-              "surface-light": "#ffffff",
-              "surface-dark": "#1a2e1d",
-              "text-main": "#0d1b10",
-              "text-secondary": "#4c9a59",
-              "border-light": "#cfe7d3",
-              "border-dark": "#2a4e30",
-              "mint-base": "#ECF9F0",
-            },
-            backgroundImage: {
-              'mint-subtle': 'linear-gradient(135deg, #ECF9F0 0%, #F5FBF5 50%, #ECF9F0 100%)',
+              primary: "#C9952A",
+              gold: "#C9952A",
+              "gold-lt": "#F0C060",
+              "gold-dk": "#8B5E10",
+              cream: "#FAF5EA",
+              ink: "#0A0806",
+              "ink-surface": "#141210",
+              "ink-elevated": "#1E1A16",
             },
             fontFamily: {
-              display: ["Work Sans", "sans-serif"],
-              body: ["Noto Sans", "sans-serif"],
+              display: ["Cormorant Garamond", "serif"],
+              sans: ["Plus Jakarta Sans", "sans-serif"],
+              body: ["Plus Jakarta Sans", "sans-serif"],
               aesthetic: ["Outfit", "sans-serif"],
-            },
-            borderRadius: {
-              DEFAULT: "0.25rem",
-              lg: "0.5rem",
-              xl: "0.75rem",
-              "2xl": "1rem",
-              "3xl": "1.5rem",
-              "4xl": "2rem",
-              full: "9999px"
-            },
-            animation: {
-              'blob': 'blob 7s infinite',
-            },
-            keyframes: {
-              blob: {
-                '0%': { transform: 'translate(0px, 0px) scale(1)' },
-                '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
-                '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
-                '100%': { transform: 'translate(0px, 0px) scale(1)' },
-              }
+              serif: ["Cormorant Garamond", "serif"],
             }
           },
         },
       }
     </script>
     <style>
+      :root {
+        --gold: #C9952A;
+        --border: rgba(201,149,42,0.18);
+        --muted: rgba(10,8,6,0.5);
+      }
+
+      .dark {
+        --muted: rgba(250,245,234,0.4);
+      }
+
       ::-webkit-scrollbar { width: 8px; }
       ::-webkit-scrollbar-track { background: transparent; }
-      ::-webkit-scrollbar-thumb { background-color: rgba(0, 0, 0, 0.1); border-radius: 4px; }
+      ::-webkit-scrollbar-thumb { background-color: rgba(201,149,42,0.3); border-radius: 4px; }
       
-      body { margin: 0; padding: 0; }
-
-      /* Remove spin buttons from number inputs */
-      input::-webkit-outer-spin-button,
-      input::-webkit-inner-spin-button {
-        -webkit-appearance: none;
-        margin: 0;
-      }
-      input[type=number] {
-        -moz-appearance: textfield;
+      body { 
+        margin: 0; padding: 0; 
+        transition: background-color 0.5s ease, color 0.5s ease;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
       }
 
-      /* Utility to hide scrollbars but keep functionality */
-      .no-scrollbar::-webkit-scrollbar {
-        display: none;
-      }
-      .no-scrollbar {
-        -ms-overflow-style: none;
-        scrollbar-width: none;
-      }
+      body.landing-active { cursor: none !important; }
+      #cursor, #cursor-ring { display: none; }
+      body.landing-active #cursor, body.landing-active #cursor-ring { display: block; }
 
-      /* Liquid Glassmorphism Effect */
-      .liquid-glass {
-        background: linear-gradient(135deg, rgba(249, 115, 22, 0.75), rgba(251, 191, 36, 0.75));
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.25);
-        box-shadow: 0 8px 32px 0 rgba(249, 115, 22, 0.2);
-        color: white !important;
-        position: relative;
-        overflow: hidden;
-        transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
-      }
-
-      .liquid-glass:hover {
-        background: linear-gradient(135deg, rgba(249, 115, 22, 0.9), rgba(251, 191, 36, 0.9));
-        box-shadow: 0 12px 48px 0 rgba(249, 115, 22, 0.35);
-        transform: translateY(-2px) scale(1.02);
-      }
-
-      .liquid-glass::before {
+      /* Noise Overlay */
+      body::before {
         content: '';
-        position: absolute;
-        top: -50%;
-        left: -50%;
-        width: 200%;
-        height: 200%;
-        background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
-        transform: translate(-10%, -10%);
-        transition: all 0.6s ease;
-        pointer-events: none;
+        position: fixed; inset: 0; z-index: 0; pointer-events: none;
+        opacity: 0.028;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+        background-size: 256px 256px;
       }
 
-      .liquid-glass:hover::before {
-        transform: translate(10%, 10%);
+      .gold-text {
+        background: linear-gradient(135deg, #F0C060 0%, #C9952A 55%, #8B5E10 100%);
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
       }
-
-      .liquid-glass-white {
-        background: rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(16px);
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.05);
-        transition: all 0.3s ease;
+      .micon {
+        font-family: 'Material Symbols Rounded';
+        font-size: 1em; line-height: 1;
+        display: inline-block;
+        font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        vertical-align: middle;
       }
-
-      .liquid-glass-white:hover {
-        background: rgba(255, 255, 255, 0.2);
-        border-color: rgba(251, 191, 36, 0.5);
+      .pill {
+        display: inline-flex; align-items: center; gap: 7px;
+        padding: 6px 14px; border-radius: 999px;
+        background: rgba(201,149,42,0.1); border: 1px solid rgba(201,149,42,0.28);
+        font-size: 10px; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; color: #C9952A;
+        font-family: 'Outfit', sans-serif;
       }
-
-      .text-gradient-mix {
-        background: linear-gradient(to right, #13ec37, #f97316, #fbbf24);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
+      .cta-btn {
+        padding: 16px 40px; border-radius: 12px;
+        background: linear-gradient(135deg, #D4A030 0%, #8B5E10 100%);
+        box-shadow: 0 10px 40px rgba(201,149,42,0.3);
+        font-size: 13px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase;
+        color: #0A0806; border: none; cursor: none;
+        transition: all 0.3s cubic-bezier(0.2, 0, 0, 1);
+        font-family: 'Outfit', sans-serif;
       }
+      .cta-btn:hover { transform: translateY(-2px); box-shadow: 0 15px 50px rgba(201,149,42,0.4); }
+      .cta-btn:active { transform: scale(0.97); }
 
-      /* Dark Mode Button Glow - Additive Enhancement */
-      .dark button {
-        position: relative;
-        transition: box-shadow 0.25s ease, transform 0.15s ease;
+      .reveal { opacity:0; transform:translateY(30px); transition:opacity 0.8s cubic-bezier(.2,.8,.2,1), transform 0.8s cubic-bezier(.2,.8,.2,1); }
+      .reveal.visible { opacity:1; transform:translateY(0); }
+
+      #cursor {
+        width: 12px; height: 12px;
+        background: #C9952A;
+        border-radius: 50%;
+        position: fixed; top: 0; left: 0;
+        pointer-events: none; z-index: 9999;
+        transform: translate(-50%, -50%);
+        transition: transform 0.08s;
+        mix-blend-mode: difference;
       }
-
-      .dark button:not(.liquid-glass):not(:disabled) {
-        box-shadow: 0 0 12px rgba(19, 236, 55, 0.12);
-      }
-
-      .dark button:not(.liquid-glass):not(:disabled):hover {
-        box-shadow: 
-          0 0 18px rgba(19, 236, 55, 0.35),
-          0 0 36px rgba(19, 236, 55, 0.25);
-        transform: translateY(-1px);
-      }
-
-      @media print {
-        @page { margin: 1.5cm; size: auto; }
-        body { background: white !important; color: black !important; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
-        .no-print { display: none !important; }
-        main { margin: 0 !important; padding: 0 !important; width: 100% !important; }
+      #cursor-ring {
+        width: 38px; height: 38px;
+        border: 1.5px solid rgba(201,149,42,0.5);
+        border-radius: 50%;
+        position: fixed; top: 0; left: 0;
+        pointer-events: none; z-index: 9998;
+        transform: translate(-50%, -50%);
+        transition: transform 0.18s cubic-bezier(.25,.8,.25,1);
       }
     </style>
   <script type="importmap">
@@ -188,7 +145,9 @@
 }
 </script>
 </head>
-  <body class="bg-mint-subtle text-text-main font-display antialiased selection:bg-primary/30 min-h-screen">
+  <body class="antialiased selection:bg-primary/30 min-h-screen bg-cream text-ink dark:bg-ink dark:text-cream font-body">
+    <div id="cursor"></div>
+    <div id="cursor-ring"></div>
     <div id="root"></div>
     <script type="module" src="./index.tsx"></script>
   </body>
