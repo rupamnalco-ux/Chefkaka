@@ -8,7 +8,7 @@
     <!-- Primary Meta Tags -->
     <title>ChefMistri - Turn Your Fridge Into a Feast</title>
     <meta name="title" content="ChefMistri - Turn Your Fridge Into a Feast" />
-    <meta name="description" content="AI-powered kitchen assistant. Manage your pantry, get personalized recipe recommendations, and plan your weekly meals with ease." />
+    <meta name="description" content="AI-powered kitchen assistant. Manage your pantry, discover gourmet inspiration, and plan your weekly meals with ease." />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -168,6 +168,18 @@
         transition: opacity 0.4s ease, transform 0.4s cubic-bezier(.2,.8,.2,1);
         text-shadow: 0 1px 3px rgba(255,255,255,0.8), 0 2px 8px rgba(201,149,42,0.3);
       }
+
+      @media (max-width: 1023px) {
+        #cursor, #cursor-ring, #cursor-label {
+          display: none !important;
+        }
+        body.landing-active {
+          cursor: auto !important;
+        }
+        .cta-btn {
+          cursor: pointer !important;
+        }
+      }
     </style>
   <script type="importmap">
 {
@@ -183,6 +195,7 @@
   }
 }
 </script>
+<link rel="stylesheet" href="/index.css">
 </head>
   <body class="antialiased selection:bg-primary/20 min-h-screen bg-cream text-ink dark:bg-ink dark:text-cream font-body">
     <div id="cursor"></div>
@@ -190,5 +203,6 @@
     <div id="cursor-label"></div>
     <div id="root"></div>
     <script type="module" src="./index.tsx"></script>
-  </body>
+  <script type="module" src="/index.tsx"></script>
+</body>
 </html>

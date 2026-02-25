@@ -60,4 +60,4 @@ export type DayOfWeek = 'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Frida
 
 export type MealPlan = Record<DayOfWeek, Record<MealSlot, Recipe | null>>;
 
-export type ViewState = 'landing' | 'pantry' | 'recommendations' | 'recipe-details' | 'cookbook' | 'shopping-list' | 'profile';
+export type ViewState = 'landing' | 'pantry' | 'recipe-details' | 'cookbook' | 'shopping-list' | 'profile' | 'discover';

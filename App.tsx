@@ -12,7 +12,9 @@ import {
 import { 
   INITIAL_PREFERENCES, 
   COMMON_STAPLES, 
-  MOCK_RECIPES 
+  MOCK_RECIPES,
+  DISCOVER_CATEGORIES,
+  DISCOVER_RECIPES
 } from './constants.tsx';
 import { 
   generateRecipesFromPantry 
@@ -73,6 +75,9 @@ const RecipeImage: React.FC<{ src: string; alt: string; className?: string }> = 
 // ─── CUSTOM CURSOR LOGIC WITH ENHANCED VISIBILITY ───
 const Cursor: React.FC<{ currentView: ViewState }> = ({ currentView }) => {
   useEffect(() => {
+    // Disable custom cursor for mobile and tablet (width < 1024px)
+    if (window.innerWidth < 1024) return;
+
     const cursor = document.getElementById('cursor');
     const cursorRing = document.getElementById('cursor-ring');
     const cursorLabel = document.getElementById('cursor-label');
@@ -203,7 +208,7 @@ const Cursor: React.FC<{ currentView: ViewState }> = ({ currentView }) => {
 const Sidebar: React.FC<{ currentView: ViewState; onNavigate: (view: ViewState) => void }> = ({ currentView, onNavigate }) => {
   const menuItems: { id: ViewState; label: string; icon: string }[] = [
     { id: 'pantry', label: 'My Pantry', icon: 'kitchen' },
-    { id: 'recommendations', label: 'Chef\'s Feed', icon: 'restaurant_menu' },
+    { id: 'discover', label: 'Discover', icon: 'explore' },
     { id: 'cookbook', label: 'Meal Planner', icon: 'calendar_today' },
     { id: 'shopping-list', label: 'Grocery List', icon: 'shopping_cart' },
     { id: 'profile', label: 'My Profile', icon: 'person' },
@@ -305,6 +310,7 @@ const Header: React.FC<{
 
 const Landing: React.FC<{ onNavigate: (view: ViewState) => void; isDarkMode: boolean; toggleDarkMode: () => void }> = ({ onNavigate, isDarkMode, toggleDarkMode }) => {
   const [page, setPage] = useState(0);
+  const [activeCategory, setActiveCategory] = useState('Trending');
   const [selectedIngredients, setSelectedIngredients] = useState<Set<string>>(new Set());
   const [generatedRecipe, setGeneratedRecipe] = useState<any>(null);
   const [isGeneratingDemo, setIsGeneratingDemo] = useState(false);
@@ -328,17 +334,9 @@ const Landing: React.FC<{ onNavigate: (view: ViewState) => void; isDarkMode: boo
     "Thai Basil Fried Rice",
   ];
 
-  const RECIPES = [
-    { title: "Seared Scallops & Saffron Foam", time: "15 MINS", diff: "HARD", img: "https://images.pexels.com/photos/5638527/pexels-photo-5638527.jpeg", popular: true },
-    { title: "Wild Mushroom Truffle Risotto", time: "35 MINS", diff: "MEDIUM", img: "https://images.pexels.com/photos/5638732/pexels-photo-5638732.jpeg", popular: true },
-    { title: "Honey Glazed Duck Breast", time: "25 MINS", diff: "HARD", img: "https://images.pexels.com/photos/604969/pexels-photo-604969.jpeg", popular: false },
-    { title: "Heirloom Tomato & Burrata", time: "10 MINS", diff: "EASY", img: "https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg", popular: true },
-    { title: "Miso Glazed Black Cod", time: "20 MINS", diff: "MEDIUM", img: "https://images.pexels.com/photos/262959/pexels-photo-262959.jpeg", popular: false },
-    { title: "Charred Octopus with Romesco", time: "40 MINS", diff: "HARD", img: "https://images.pexels.com/photos/699953/pexels-photo-699953.jpeg", popular: false },
-    { title: "Arugula & Fig Salad", time: "15 MINS", diff: "EASY", img: "https://images.pexels.com/photos/1213710/pexels-photo-1213710.jpeg", popular: false },
-    { title: "Braised Wagyu Short Ribs", time: "4 HOURS", diff: "HARD", img: "https://images.pexels.com/photos/769289/pexels-photo-769289.jpeg", popular: true },
-    { title: "Pistachio Crusted Salmon", time: "25 MINS", diff: "MEDIUM", img: "https://images.pexels.com/photos/1640775/pexels-photo-1640775.jpeg", popular: false },
-  ];
+  const filteredRecipes = DISCOVER_RECIPES.filter(r => r.category === activeCategory);
+  const currentVisibleRecipes = filteredRecipes.slice(page * 3, (page + 1) * 3);
+  const totalPages = Math.ceil(filteredRecipes.length / 3);
 
   const STATS = [
     { val: "10k+", label: "Active Chefs" },
@@ -391,16 +389,16 @@ const Landing: React.FC<{ onNavigate: (view: ViewState) => void; isDarkMode: boo
       if (!deleting) {
         cIdx++;
         setTypewriterText(s.slice(0, cIdx));
-        if (cIdx === s.length) { deleting = true; timer = setTimeout(type, 2200); return; }
-        timer = setTimeout(type, 55);
+        if (cIdx === s.length) { deleting = true; timer = window.setTimeout(type, 2200); return; }
+        timer = window.setTimeout(type, 55);
       } else {
         cIdx--;
         setTypewriterText(s.slice(0, cIdx));
-        if (cIdx === 0) { deleting = false; sIdx = (sIdx + 1) % suggestions.length; timer = setTimeout(type, 400); return; }
-        timer = setTimeout(type, 28);
+        if (cIdx === 0) { deleting = false; sIdx = (sIdx + 1) % suggestions.length; timer = window.setTimeout(type, 400); return; }
+        timer = window.setTimeout(type, 28);
       }
     };
-    timer = setTimeout(type, 1200);
+    timer = window.setTimeout(type, 1200);
 
     return () => {
       document.body.classList.remove('landing-active');
@@ -431,8 +429,6 @@ const Landing: React.FC<{ onNavigate: (view: ViewState) => void; isDarkMode: boo
     }, 1200);
   };
 
-  const currentVisibleRecipes = RECIPES.slice(page * 3, (page + 1) * 3);
-
   return (
     <div className="flex-1 flex flex-col min-h-screen scroll-smooth overflow-x-hidden font-body relative">
       <Cursor currentView="landing" />
@@ -455,7 +451,11 @@ const Landing: React.FC<{ onNavigate: (view: ViewState) => void; isDarkMode: boo
         </a>
         <div className="hidden lg:flex gap-10">
           {['Features', 'Discover', 'Pricing'].map(item => (
-            <a key={item} href={`#${item.toLowerCase()}`} className="font-aesthetic text-[12px] font-bold uppercase tracking-[0.2em] text-ink dark:text-cream/40 hover:text-gold transition-colors relative group">
+            <a 
+              key={item} 
+              href={item === 'Discover' ? '#ingredient-section' : `#${item.toLowerCase()}`} 
+              className="font-aesthetic text-[12px] font-bold uppercase tracking-[0.2em] text-ink dark:text-cream/40 hover:text-gold transition-colors relative group"
+            >
               {item}
               <span className="absolute bottom-[-4px] left-0 w-0 h-[1.5px] bg-gold transition-all group-hover:w-full"></span>
             </a>
@@ -629,11 +629,17 @@ const Landing: React.FC<{ onNavigate: (view: ViewState) => void; isDarkMode: boo
           <p className="font-body text-[17px] text-slate-500 dark:text-cream/40 max-w-[460px] mx-auto mt-6 leading-relaxed font-bold">Powerful tools built for the modern home cook.</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-[2px] border border-primary/20 rounded-[2.5rem] overflow-hidden reveal [animation-delay:0.1s] shadow-2xl shadow-gold/5 bg-slate-100 dark:bg-primary/20">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[2px] border border-primary/20 rounded-[2.5rem] overflow-hidden reveal [animation-delay:0.1s] shadow-2xl shadow-gold/5 bg-slate-100 dark:bg-primary/20">
           {[
             { id: '01', tag: 'Organise', title: 'Smart Pantry', desc: 'Real-time inventory management. Know what you have, track expiry dates, and eliminate waste.', icon: 'inventory_2', color: '#B45309' },
             { id: '02', tag: 'Create', title: 'AI Recipes', desc: 'The "What can I cook?" engine generates recipes tailored to your current stock and dietary needs.', icon: 'flare', color: '#B91C1C' },
-            { id: '03', tag: 'Shop', title: 'Auto-Grocery', desc: 'Missing an ingredient? Add it to your smart list with one tap. Integrates with top delivery apps.', icon: 'shopping_basket', color: '#1D4ED8' }
+            { id: '03', tag: 'Plan', title: 'Meal Planner', desc: 'Effortless drag-and-drop scheduling. Plan your week in minutes and sync with your calendar.', icon: 'calendar_today', color: '#047857' },
+            { id: '04', tag: 'Shop', title: 'Auto-Grocery', desc: 'Missing an ingredient? Add it to your smart list with one tap. Integrates with top delivery apps.', icon: 'shopping_basket', color: '#1D4ED8' },
+            { id: '05', tag: 'Personalise', title: 'Flavor Profile', desc: 'Tune the AI to your palate. Set dietary types, allergies, and flavor preferences for perfect matches.', icon: 'tune', color: '#7C3AED' },
+            { id: '06', tag: 'Focus', title: 'Cooking Mode', desc: 'A hands-free, high-contrast interface designed for the heat of the kitchen. Voice-guided steps.', icon: 'auto_stories', color: '#EA580C' },
+            { id: '07', tag: 'Pair', title: 'Wine Pairings', desc: 'Elevate your meals with AI-suggested beverage matches. Perfect pairings for every gourmet creation.', icon: 'wine_bar', color: '#BE123C' },
+            { id: '08', tag: 'Collect', title: 'My Cookbook', desc: 'Save your favorite masterpieces. Organize by cuisine, occasion, or difficulty for quick access.', icon: 'book', color: '#15803D' },
+            { id: '09', tag: 'Level Up', title: 'Mastery Progress', desc: 'Track your culinary journey. Level up from Sous Chef to Executive Master as you cook.', icon: 'military_tech', color: '#C9952A' }
           ].map((feat) => (
             <div 
               key={feat.id}
@@ -656,17 +662,52 @@ const Landing: React.FC<{ onNavigate: (view: ViewState) => void; isDarkMode: boo
       <section id="recipes" className="py-24 px-8 lg:px-20 max-w-[1320px] mx-auto relative z-10">
         <div className="flex flex-col lg:flex-row lg:items-end justify-between mb-16 gap-10 reveal">
           <div>
-            <div className="pill mb-5 shadow-sm"><span className="micon !text-[12px] text-gold-dk dark:text-gold">trending_up</span> Trending Now</div>
-            <h2 className="font-display text-[3rem] lg:text-[4rem] font-black text-ink dark:text-white tracking-tight">Seasonal <em className="gold-text italic">Picks</em></h2>
-            <p className="font-body text-[16px] text-slate-500 dark:text-cream/40 mt-4 font-black tracking-wide uppercase text-[12px]">AI Hand-curated · Page {page + 1} of 3</p>
-          </div>
-          <div className="flex items-center gap-8">
-            <div className="flex gap-2.5">
-              {[0, 1, 2].map(i => <button key={i} onClick={() => setPage(i)} className={`h-2 rounded-full transition-all duration-500 ${i === page ? 'w-12 bg-gold shadow-lg shadow-gold/30' : 'w-2 bg-slate-300 dark:bg-cream/10 hover:bg-gold/40'}`}></button>)}
+            <div className="pill mb-5 shadow-sm">
+              <span className="micon !text-[12px] text-gold-dk dark:text-gold">
+                {activeCategory === 'Trending' ? 'trending_up' : 
+                 activeCategory === 'Global' ? 'public' : 
+                 activeCategory === 'Zero-Waste' ? 'recycling' : 'mood'}
+              </span> 
+              {activeCategory}
             </div>
-            <div className="flex gap-4">
-              <button onClick={() => setPage(p => (p - 1 + 3) % 3)} className="size-14 rounded-[1.25rem] border border-slate-200 dark:border-primary/20 bg-white dark:bg-ink-surface hover:border-gold transition-all flex items-center justify-center text-ink dark:text-white shadow-md active:scale-90"><span className="micon text-[28px]">chevron_left</span></button>
-              <button onClick={() => setPage(p => (p + 1) % 3)} className="size-14 rounded-[1.25rem] border border-slate-200 dark:border-primary/20 bg-white dark:bg-ink-surface hover:border-gold transition-all flex items-center justify-center text-ink dark:text-white shadow-md active:scale-90"><span className="micon text-[28px]">chevron_right</span></button>
+            <h2 className="font-display text-[3rem] lg:text-[4rem] font-black text-ink dark:text-white tracking-tight">
+              {activeCategory === 'Trending' ? 'Seasonal ' : 
+               activeCategory === 'Global' ? 'The Global ' : 
+               activeCategory === 'Zero-Waste' ? 'Zero-Waste ' : 'Mood-Based '}
+              <em className="gold-text italic">
+                {activeCategory === 'Trending' ? 'Picks' : 
+                 activeCategory === 'Global' ? 'Pantry' : 
+                 activeCategory === 'Zero-Waste' ? 'Wonders' : 'Menus'}
+              </em>
+            </h2>
+            <p className="font-body text-[16px] text-slate-500 dark:text-cream/40 mt-4 font-black tracking-wide uppercase text-[12px]">AI Hand-curated · Page {page + 1} of {totalPages || 1}</p>
+          </div>
+          <div className="flex flex-col items-end gap-8">
+            <div className="flex gap-3 bg-slate-100 dark:bg-ink-elevated p-1.5 rounded-2xl border border-primary/10">
+              {DISCOVER_CATEGORIES.map(cat => (
+                <button 
+                  key={cat}
+                  onClick={() => { setActiveCategory(cat); setPage(0); }}
+                  className={`px-6 py-2.5 rounded-xl font-aesthetic text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${activeCategory === cat ? 'bg-white dark:bg-ink shadow-lg text-gold-dk dark:text-gold scale-105' : 'text-slate-400 dark:text-cream/20 hover:text-ink dark:hover:text-cream'}`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+            <div className="flex items-center gap-8">
+              <div className="flex gap-2.5">
+                {Array.from({ length: totalPages || 1 }).map((_, i) => (
+                  <button 
+                    key={i} 
+                    onClick={() => setPage(i)} 
+                    className={`h-2 rounded-full transition-all duration-500 ${i === page ? 'w-12 bg-gold shadow-lg shadow-gold/30' : 'w-2 bg-slate-300 dark:bg-cream/10 hover:bg-gold/40'}`}
+                  ></button>
+                ))}
+              </div>
+              <div className="flex gap-4">
+                <button onClick={() => setPage(p => (p - 1 + totalPages) % totalPages)} className="size-14 rounded-[1.25rem] border border-slate-200 dark:border-primary/20 bg-white dark:bg-ink-surface hover:border-gold transition-all flex items-center justify-center text-ink dark:text-white shadow-md active:scale-90"><span className="micon text-[28px]">chevron_left</span></button>
+                <button onClick={() => setPage(p => (p + 1) % totalPages)} className="size-14 rounded-[1.25rem] border border-slate-200 dark:border-primary/20 bg-white dark:bg-ink-surface hover:border-gold transition-all flex items-center justify-center text-ink dark:text-white shadow-md active:scale-90"><span className="micon text-[28px]">chevron_right</span></button>
+              </div>
             </div>
           </div>
         </div>
@@ -748,12 +789,19 @@ const Landing: React.FC<{ onNavigate: (view: ViewState) => void; isDarkMode: boo
 export default function App() {
   const [view, setView] = useState<ViewState>('landing');
   const [pantry, setPantry] = useState<Ingredient[]>([]);
-  const [recommendations, setRecommendations] = useState<Recipe[]>(MOCK_RECIPES);
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [inputValue, setInputValue] = useState('');
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [userProfile, setUserProfile] = useState<UserProfile>({
+    fullName: 'Chef Julian Mistri',
+    email: 'julian@chefmistri.ai',
+    username: 'gourmet_master',
+    bio: 'Passionate about fusion cuisine and sustainable cooking. Always looking for the perfect balance of flavors.',
+    avatar: 'https://picsum.photos/seed/chef/200/200'
+  });
+  const [userPrefs, setUserPrefs] = useState<UserPreferences>(INITIAL_PREFERENCES);
   
   const plannerScrollRef = useRef<HTMLDivElement>(null);
   const dragInfo = useRef({ isDragging: false, startX: 0, scrollLeft: 0 });
@@ -788,8 +836,13 @@ export default function App() {
     setErrorMsg(null);
     try {
       const recs = await generateRecipesFromPantry(pantry.map(p => p.name), INITIAL_PREFERENCES);
-      setRecommendations(recs);
-      setView('recommendations');
+      if (recs.length > 0) {
+        setSelectedRecipe(recs[0]);
+        setView('recipe-details');
+      } else {
+        setView('discover');
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err: any) {
       setErrorMsg(err.message || "Failed to generate recipes. Check your connection.");
     } finally {
@@ -888,29 +941,51 @@ export default function App() {
         </div>
       );
 
-      case 'recommendations': return (
-        <div className="p-14 max-w-7xl mx-auto w-full animate-in fade-in duration-1000">
-           <div className="space-y-4 mb-16">
-              <h2 className="font-display text-[4.5rem] font-black text-ink dark:text-white tracking-tighter leading-none">Chef's Feed</h2>
-              <p className="font-body text-[19px] text-slate-600 dark:text-cream/50 font-bold italic">Hand-picked by AI for your palate.</p>
-           </div>
-           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 pb-32">
-             {recommendations.map((recipe, i) => (
-               <div key={recipe.id} onClick={() => { setSelectedRecipe(recipe); setView('recipe-details'); }} className="cursor-pointer group bg-white dark:bg-slate-900 rounded-[3.5rem] overflow-hidden border border-slate-100 dark:border-slate-800 shadow-xl shadow-ink/5 hover:shadow-[0_60px_120px_-20px_rgba(10,8,6,0.12)] dark:hover:shadow-[0_60px_120px_-20px_rgba(0,0,0,0.8)] transition-all duration-700 hover:-translate-y-3" style={{ animationDelay: `${i * 100}ms` }}>
-                 <RecipeImage src={recipe.image} alt={recipe.title} className="aspect-[4/3] group-hover:scale-105 transition-transform duration-1000" />
-                 <div className="p-10">
-                   <div className="flex justify-between mb-6">
-                     <span className={`font-aesthetic text-[10px] font-black px-4 py-1.5 rounded-full border uppercase tracking-[0.2em] shadow-sm ${getDifficultyColor(recipe.difficulty)}`}>
-                       {recipe.difficulty}
-                     </span>
-                     <span className="font-aesthetic text-[10px] font-black text-gold-dk dark:text-gold uppercase tracking-[0.2em] bg-gold/5 px-3 py-1.5 rounded-full">{recipe.matchPercentage}% match</span>
-                   </div>
-                   <h3 className="font-display text-[28px] font-black text-ink dark:text-white group-hover:text-primary transition-colors duration-500 leading-tight mb-4">{recipe.title}</h3>
-                   <p className="font-body mt-4 text-slate-600 dark:text-slate-400 line-clamp-2 font-bold leading-relaxed italic">{recipe.description}</p>
-                 </div>
-               </div>
-             ))}
-           </div>
+      case 'discover': return (
+        <div className="p-14 max-w-7xl mx-auto w-full animate-in fade-in duration-1000 space-y-20">
+          <div className="space-y-4">
+            <h2 className="font-display text-[4.5rem] font-black text-ink dark:text-white tracking-tighter leading-none">Discover</h2>
+            <p className="font-body text-[19px] text-slate-600 dark:text-cream/50 font-bold italic">Explore the world of AI-crafted culinary excellence.</p>
+          </div>
+
+          {DISCOVER_CATEGORIES.map(category => (
+            <div key={category} className="space-y-10">
+              <div className="flex items-center justify-between border-b border-primary/10 pb-6">
+                <h3 className="font-display text-3xl font-black text-ink dark:text-white">{category}</h3>
+                <span className="font-aesthetic text-[10px] font-black text-gold-dk dark:text-gold uppercase tracking-[0.3em] bg-gold/5 px-4 py-2 rounded-full border border-gold/10">
+                  {DISCOVER_RECIPES.filter(r => r.category === category).length} Recipes
+                </span>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+                {DISCOVER_RECIPES.filter(r => r.category === category).map((recipe, i) => (
+                  <div 
+                    key={recipe.title} 
+                    onClick={() => setView('pantry')}
+                    className="bg-white dark:bg-ink-surface border border-slate-100 dark:border-primary/10 rounded-[3rem] overflow-hidden transition-all duration-700 hover:-translate-y-4 hover:shadow-[0_40px_80px_rgba(10,8,6,0.12)] dark:hover:shadow-[0_50px_100px_rgba(0,0,0,0.7)] group cursor-pointer"
+                  >
+                    <div className="h-[240px] overflow-hidden relative">
+                      <RecipeImage src={recipe.img} alt={recipe.title} className="w-full h-full" />
+                      {recipe.popular && (
+                        <div className="font-aesthetic absolute top-6 right-6 flex items-center gap-2 bg-white/90 dark:bg-gold/90 backdrop-blur-lg rounded-full px-4 py-2 shadow-2xl border border-gold/20">
+                          <span className="micon !text-[13px] text-gold-dk dark:text-ink">local_fire_department</span>
+                          <span className="text-[10px] font-black uppercase tracking-[0.1em] text-gold-dk dark:text-ink">Popular</span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-10">
+                      <h4 className="font-display text-[24px] font-black text-ink dark:text-white mb-4 leading-tight group-hover:text-gold transition-colors duration-300">{recipe.title}</h4>
+                      <div className="font-aesthetic flex items-center gap-5 text-[10px] font-black tracking-[0.15em] text-slate-400 dark:text-cream/40 uppercase">
+                        <div className="flex items-center gap-2"><span className="micon !text-[16px] text-gold/70">schedule</span> {recipe.time}</div>
+                        <div className="flex items-center gap-2" style={{ color: recipe.diff === 'EASY' ? '#16a34a' : recipe.diff === 'MEDIUM' ? '#d97706' : '#dc2626' }}>
+                          <span className="micon !text-[16px]">signal_cellular_alt</span> {recipe.diff}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
       );
 
@@ -1019,12 +1094,93 @@ export default function App() {
         </div>
       );
 
+      case 'profile': return (
+        <div className="p-14 max-w-5xl mx-auto w-full animate-in fade-in duration-1000 space-y-20">
+          <div className="flex flex-col lg:flex-row gap-16 items-center lg:items-start">
+            <div className="relative group">
+              <div className="size-56 rounded-[5rem] overflow-hidden border-4 border-white dark:border-slate-800 shadow-2xl">
+                <img src={userProfile.avatar} alt="Avatar" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" referrerPolicy="no-referrer" />
+              </div>
+              <button className="absolute bottom-4 right-4 size-12 bg-primary text-white rounded-2xl flex items-center justify-center shadow-xl hover:scale-110 transition-all">
+                <span className="material-symbols-outlined text-[20px]">edit</span>
+              </button>
+            </div>
+            
+            <div className="flex-1 space-y-8 text-center lg:text-left">
+              <div className="space-y-4">
+                <h2 className="font-display text-[4.5rem] font-black text-ink dark:text-white tracking-tighter leading-none">{userProfile.fullName}</h2>
+                <p className="font-aesthetic text-[12px] font-black text-gold-dk dark:text-gold uppercase tracking-[0.4em]">@{userProfile.username} · Master Chef Level 1</p>
+              </div>
+              <p className="font-body text-[20px] text-slate-600 dark:text-cream/50 font-bold leading-relaxed max-w-2xl italic">"{userProfile.bio}"</p>
+              <div className="flex flex-wrap justify-center lg:justify-start gap-4">
+                <button className="cta-btn !py-4 !px-10 !text-[11px]">Edit Profile</button>
+                <button className="font-aesthetic px-10 py-4 border border-slate-200 dark:border-slate-800 rounded-xl text-[11px] font-black uppercase tracking-widest text-slate-500 hover:text-ink dark:hover:text-white transition-all">Settings</button>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-14">
+            <div className="bg-white dark:bg-slate-900 p-14 rounded-[4rem] border border-slate-100 dark:border-slate-800 shadow-2xl space-y-12">
+              <h3 className="font-display text-3xl font-black text-ink dark:text-white tracking-tight">Dietary Preferences</h3>
+              <div className="space-y-8">
+                <div className="space-y-4">
+                  <p className="font-aesthetic text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Diet Type</p>
+                  <div className="flex flex-wrap gap-3">
+                    {['Omnivore', 'Vegetarian', 'Vegan', 'Pescetarian'].map(diet => (
+                      <button 
+                        key={diet}
+                        onClick={() => setUserPrefs({...userPrefs, dietType: diet as any})}
+                        className={`px-6 py-2.5 rounded-xl font-aesthetic text-[10px] font-black uppercase tracking-widest transition-all ${userPrefs.dietType === diet ? 'bg-primary text-white shadow-lg' : 'bg-slate-50 dark:bg-slate-800 text-slate-400'}`}
+                      >
+                        {diet}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <p className="font-aesthetic text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Skill Level</p>
+                  <div className="flex flex-wrap gap-3">
+                    {['Beginner', 'Home Cook', 'Intermediate', 'Advanced', 'Pro Chef'].map(level => (
+                      <button 
+                        key={level}
+                        onClick={() => setUserPrefs({...userPrefs, skillLevel: level as any})}
+                        className={`px-6 py-2.5 rounded-xl font-aesthetic text-[10px] font-black uppercase tracking-widest transition-all ${userPrefs.skillLevel === level ? 'bg-gold-dk text-white shadow-lg' : 'bg-slate-50 dark:bg-slate-800 text-slate-400'}`}
+                      >
+                        {level}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white dark:bg-slate-900 p-14 rounded-[4rem] border border-slate-100 dark:border-slate-800 shadow-2xl space-y-12">
+              <h3 className="font-display text-3xl font-black text-ink dark:text-white tracking-tight">Culinary Stats</h3>
+              <div className="grid grid-cols-2 gap-8">
+                {[
+                  { label: 'Recipes Made', val: '42', icon: 'restaurant' },
+                  { label: 'Ingredients Saved', val: '128', icon: 'eco' },
+                  { label: 'Favorite Cuisine', val: 'Italian', icon: 'public' },
+                  { label: 'Cooking Streak', val: '5 Days', icon: 'local_fire_department' }
+                ].map(stat => (
+                  <div key={stat.label} className="p-8 bg-slate-50 dark:bg-slate-800/50 rounded-[2.5rem] border border-transparent hover:border-primary/20 transition-all duration-500 group">
+                    <span className="material-symbols-outlined text-primary text-[28px] mb-4 group-hover:scale-110 transition-transform duration-500">{stat.icon}</span>
+                    <p className="font-aesthetic text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] mb-2">{stat.label}</p>
+                    <p className="font-display text-2xl font-black text-ink dark:text-white">{stat.val}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+
       case 'recipe-details':
         if (!selectedRecipe) return null;
         return (
           <div className="p-14 max-w-6xl mx-auto w-full space-y-20 pb-40 animate-in fade-in slide-in-from-bottom-12 duration-1000">
-            <button onClick={() => setView('recommendations')} className="font-aesthetic flex items-center gap-4 font-black text-slate-400 hover:text-primary transition-all uppercase tracking-[0.4em] text-[11px] group bg-white dark:bg-slate-900/50 w-fit px-6 py-3 rounded-2xl border border-slate-100 dark:border-primary/20 shadow-xl shadow-ink/5">
-              <span className="material-symbols-outlined group-hover:-translate-x-2 transition-transform duration-500">arrow_back</span> Back to feed
+            <button onClick={() => setView('discover')} className="font-aesthetic flex items-center gap-4 font-black text-slate-400 hover:text-primary transition-all uppercase tracking-[0.4em] text-[11px] group bg-white dark:bg-slate-900/50 w-fit px-6 py-3 rounded-2xl border border-slate-100 dark:border-primary/20 shadow-xl shadow-ink/5">
+              <span className="material-symbols-outlined group-hover:-translate-x-2 transition-transform duration-500">arrow_back</span> Back to Discover
             </button>
 
             <div className="space-y-10">

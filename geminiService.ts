@@ -37,7 +37,7 @@ export const generateAIImage = async (prompt: string): Promise<string> => {
   const fallback = `https://image.pollinations.ai/prompt/professional%20food%20photography%20of%20${encodeURIComponent(prompt)}?width=800&height=800&seed=${seed}&model=flux`;
   
   try {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || process.env.API_KEY });
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash-image',
       contents: {
@@ -90,15 +90,21 @@ export const generateRecipesFromPantry = async (ingredients: string[], prefs: Us
   if (ingredients.length === 0) return [];
   
   try {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-    const prompt = `Generate 3 creative gourmet recipes using: ${ingredients.join(', ')}. 
+    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || process.env.API_KEY });
+    const prompt = `Generate 3 creative gourmet recipes using these ingredients: ${ingredients.join(', ')}. 
     Dietary preferences: ${prefs.dietType}. 
     Allergies to avoid: ${prefs.allergies.join(', ') || 'None'}.
-    User Skill Level: ${prefs.skillLevel}.`;
+    User Skill Level: ${prefs.skillLevel}.
+    
+    Guidelines:
+    1. Prioritize using the provided ingredients.
+    2. You may assume common pantry staples (salt, pepper, oil, water, basic spices) are available.
+    3. If the ingredients are limited, be creative with simple but elegant preparations.
+    4. Ensure the output is a valid JSON array of 3 recipe objects following the provided schema.`;
 
     const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
-      contents: prompt,
+      model: "gemini-3-pro-preview",
+      contents: [{ parts: [{ text: prompt }] }],
       config: {
         responseMimeType: "application/json",
         responseSchema: {
@@ -108,21 +114,41 @@ export const generateRecipesFromPantry = async (ingredients: string[], prefs: Us
       }
     });
 
-    const results = extractJSON(response.text || "[]");
+    const text = response.text;
+    if (!text) {
+      throw new Error("The AI was unable to generate recipes at this time. Please try again with different ingredients.");
+    }
+
+    const results = extractJSON(text);
     
+    if (!Array.isArray(results) || results.length === 0) {
+      throw new Error("No recipes were found for these ingredients. Try adding more staples like rice, eggs, or flour.");
+    }
+
     // Parallelize image generation for speed
     const recipePromises = results.map(async (r: any) => {
-      const image = await generateAIImage(r.title);
-      return {
-        ...r,
-        id: Math.random().toString(36).substr(2, 9),
-        image
-      };
+      try {
+        const image = await generateAIImage(r.title);
+        return {
+          ...r,
+          id: Math.random().toString(36).substr(2, 9),
+          image
+        };
+      } catch (e) {
+        return {
+          ...r,
+          id: Math.random().toString(36).substr(2, 9),
+          image: `https://picsum.photos/seed/${encodeURIComponent(r.title)}/800/600`
+        };
+      }
     });
 
     return await Promise.all(recipePromises);
   } catch (error: any) {
     console.error("Recipe Generation Error:", error);
+    if (error.message?.includes("API key")) {
+      throw new Error("API Key issue. Please ensure your Gemini API key is correctly configured.");
+    }
     throw error;
   }
 };

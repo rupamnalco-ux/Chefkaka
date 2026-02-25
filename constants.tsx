@@ -19,6 +19,31 @@ export const COMMON_STAPLES = [
   { name: 'Garlic', icon: 'spa', color: 'gray' },
 ];
 
+export const DISCOVER_CATEGORIES = ["Trending", "Global", "Zero-Waste", "Moods"];
+
+export const DISCOVER_RECIPES = [
+  // Trending
+  { title: "Seared Scallops & Saffron Foam", time: "15 MINS", diff: "HARD", img: "https://images.pexels.com/photos/5638527/pexels-photo-5638527.jpeg", popular: true, category: "Trending" },
+  { title: "Wild Mushroom Truffle Risotto", time: "35 MINS", diff: "MEDIUM", img: "https://images.pexels.com/photos/5638732/pexels-photo-5638732.jpeg", popular: true, category: "Trending" },
+  { title: "Honey Glazed Duck Breast", time: "25 MINS", diff: "HARD", img: "https://images.pexels.com/photos/604969/pexels-photo-604969.jpeg", popular: false, category: "Trending" },
+  { title: "Heirloom Tomato & Burrata", time: "10 MINS", diff: "EASY", img: "https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg", popular: true, category: "Trending" },
+  
+  // Global
+  { title: "Miso Glazed Black Cod", time: "20 MINS", diff: "MEDIUM", img: "https://images.pexels.com/photos/262959/pexels-photo-262959.jpeg", popular: false, category: "Global" },
+  { title: "Thai Basil Fried Rice", time: "15 MINS", diff: "EASY", img: "https://images.pexels.com/photos/5938/food-salad-healthy-lunch.jpg", popular: true, category: "Global" },
+  { title: "Moroccan Lamb Tagine", time: "2 HOURS", diff: "HARD", img: "https://images.pexels.com/photos/1273765/pexels-photo-1273765.jpeg", popular: false, category: "Global" },
+  
+  // Zero-Waste
+  { title: "Wilted Greens Pesto Pasta", time: "15 MINS", diff: "EASY", img: "https://images.pexels.com/photos/1279330/pexels-photo-1279330.jpeg", popular: false, category: "Zero-Waste" },
+  { title: "Stale Bread Panzanella", time: "10 MINS", diff: "EASY", img: "https://images.pexels.com/photos/1213710/pexels-photo-1213710.jpeg", popular: false, category: "Zero-Waste" },
+  { title: "Broccoli Stalk Stir-fry", time: "12 MINS", diff: "EASY", img: "https://images.pexels.com/photos/262959/pexels-photo-262959.jpeg", popular: false, category: "Zero-Waste" },
+
+  // Moods
+  { title: "Rainy Day Pumpkin Soup", time: "40 MINS", diff: "MEDIUM", img: "https://images.pexels.com/photos/539451/pexels-photo-539451.jpeg", popular: true, category: "Moods" },
+  { title: "Post-Gym Protein Bowl", time: "20 MINS", diff: "EASY", img: "https://images.pexels.com/photos/1640775/pexels-photo-1640775.jpeg", popular: false, category: "Moods" },
+  { title: "Date Night Filet Mignon", time: "30 MINS", diff: "HARD", img: "https://images.pexels.com/photos/769289/pexels-photo-769289.jpeg", popular: true, category: "Moods" },
+];
+
 export const MOCK_RECIPES = [
   {
     id: '1',
